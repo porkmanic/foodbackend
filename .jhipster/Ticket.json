@@ -1,0 +1,38 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-one",
+            "relationshipName": "foodOrder",
+            "otherEntityName": "foodOrder",
+            "otherEntityField": "id",
+            "ownerSide": true,
+            "otherEntityRelationshipName": "ticket"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "user",
+            "otherEntityName": "user",
+            "otherEntityField": "login"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipName": "foodJoint",
+            "otherEntityName": "foodJoint",
+            "otherEntityField": "id"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "status",
+            "fieldType": "TicketStatus",
+            "fieldValues": "WAIT,PROCESS,SKIP,FINISH"
+        }
+    ],
+    "changelogDate": "20161106153904",
+    "entityTableName": "ticket",
+    "dto": "no",
+    "pagination": "no",
+    "service": "serviceClass",
+    "searchEngine": "elasticsearch"
+}

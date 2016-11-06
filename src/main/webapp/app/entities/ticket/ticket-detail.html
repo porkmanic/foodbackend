@@ -1,0 +1,35 @@
+
+<div>
+    <h2><span>Ticket</span> {{vm.ticket.id}}</h2>
+    <hr>
+    <jhi-alert-error></jhi-alert-error>
+    <dl class="dl-horizontal jh-entity-details">
+        <dt><span>Status</span></dt>
+        <dd>
+            <span>{{vm.ticket.status}}</span>
+        </dd>
+        <dt><span>Food Order</span></dt>
+        <dd>
+            <a ui-sref="food-order-detail({id:vm.ticket.foodOrder.id})">{{vm.ticket.foodOrder.id}}</a>
+        </dd>
+        <dt><span>User</span></dt>
+        <dd>
+            {{vm.ticket.user.login}}
+        </dd>
+        <dt><span>Food Joint</span></dt>
+        <dd>
+            <a ui-sref="food-joint-detail({id:vm.ticket.foodJoint.id})">{{vm.ticket.foodJoint.id}}</a>
+        </dd>
+    </dl>
+
+    <button type="submit"
+            ui-sref="{{ vm.previousState }}"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span> Back</span>
+    </button>
+
+    <button type="button" ui-sref="ticket-detail.edit({id:vm.ticket.id})" class="btn btn-primary">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span class="hidden-xs hidden-sm"> Edit</span>
+    </button>
+</div>

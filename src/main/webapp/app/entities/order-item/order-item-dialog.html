@@ -1,0 +1,56 @@
+
+<form name="editForm" role="form" novalidate ng-submit="vm.save()">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                ng-click="vm.clear()">&times;</button>
+        <h4 class="modal-title" id="myOrderItemLabel">Create or edit a Order Item</h4>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group" ng-show="vm.orderItem.id">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                    ng-model="vm.orderItem.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_quantity">Quantity</label>
+            <input type="number" class="form-control" name="quantity" id="field_quantity"
+                    ng-model="vm.orderItem.quantity"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_name">Name</label>
+            <input type="text" class="form-control" name="name" id="field_name"
+                    ng-model="vm.orderItem.name"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_price">Price</label>
+            <input type="number" class="form-control" name="price" id="field_price"
+                    ng-model="vm.orderItem.price"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_imageUrl">Image Url</label>
+            <input type="text" class="form-control" name="imageUrl" id="field_imageUrl"
+                    ng-model="vm.orderItem.imageUrl"
+                     />
+        </div>
+
+        <div class="form-group">
+            <label for="field_foodOrder">Food Order</label>
+            <select class="form-control" id="field_foodOrder" name="foodOrder" ng-model="vm.orderItem.foodOrder" ng-options="foodOrder as foodOrder.id for foodOrder in vm.foodorders track by foodOrder.id">
+                <option value=""></option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">
+            <span class="glyphicon glyphicon-ban-circle"></span>&nbsp;<span>Cancel</span>
+        </button>
+        <button type="submit" ng-disabled="editForm.$invalid || vm.isSaving" class="btn btn-primary">
+            <span class="glyphicon glyphicon-save"></span>&nbsp;<span>Save</span>
+        </button>
+    </div>
+</form>

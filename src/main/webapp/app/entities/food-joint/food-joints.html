@@ -1,0 +1,64 @@
+<div>
+    <h2>Food Joints</h2>
+    <jhi-alert></jhi-alert>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-4 no-padding-left">
+                <button class="btn btn-primary" ui-sref="food-joint.new" >
+                    <span class="glyphicon glyphicon-plus"></span>
+                    <span >
+                        Create new Food Joint
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="table-responsive">
+        <table class="jh-table table table-striped">
+            <thead>
+                <tr>
+                    <th><span>ID</span></th>
+                    <th><span>Name</span></th>
+                    <th><span>Image Url</span></th>
+                    <th><span>Serving Number</span></th>
+                    <th><span>Last Issued Ticket Num</span></th>
+                    <th><span>Estimat Wait Per Person</span></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="foodJoint in vm.foodJoints track by foodJoint.id">
+                    <td><a ui-sref="food-joint-detail({id:foodJoint.id})">{{foodJoint.id}}</a></td>
+                    <td>{{foodJoint.name}}</td>
+                    <td>{{foodJoint.imageUrl}}</td>
+                    <td>{{foodJoint.servingNumber}}</td>
+                    <td>{{foodJoint.lastIssuedTicketNum}}</td>
+                    <td>{{foodJoint.estimatWaitPerPerson}}</td>
+                    <td class="text-right">
+                        <div class="btn-group flex-btn-group-container">
+                            <button type="submit"
+                                    ui-sref="food-joint-detail({id:foodJoint.id})"
+                                    class="btn btn-info btn-sm">
+                                <span class="glyphicon glyphicon-eye-open"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                            <button type="submit"
+                                    ui-sref="food-joint.edit({id:foodJoint.id})"
+                                    class="btn btn-primary btn-sm">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                            <button type="submit"
+                                    ui-sref="food-joint.delete({id:foodJoint.id})"
+                                    class="btn btn-danger btn-sm">
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

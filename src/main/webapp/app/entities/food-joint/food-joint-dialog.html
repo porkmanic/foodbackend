@@ -1,0 +1,56 @@
+
+<form name="editForm" role="form" novalidate ng-submit="vm.save()">
+
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                ng-click="vm.clear()">&times;</button>
+        <h4 class="modal-title" id="myFoodJointLabel">Create or edit a Food Joint</h4>
+    </div>
+    <div class="modal-body">
+        <jhi-alert-error></jhi-alert-error>
+        <div class="form-group" ng-show="vm.foodJoint.id">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" id="id" name="id"
+                    ng-model="vm.foodJoint.id" readonly />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_name">Name</label>
+            <input type="text" class="form-control" name="name" id="field_name"
+                    ng-model="vm.foodJoint.name"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_imageUrl">Image Url</label>
+            <input type="text" class="form-control" name="imageUrl" id="field_imageUrl"
+                    ng-model="vm.foodJoint.imageUrl"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_servingNumber">Serving Number</label>
+            <input type="number" class="form-control" name="servingNumber" id="field_servingNumber"
+                    ng-model="vm.foodJoint.servingNumber"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_lastIssuedTicketNum">Last Issued Ticket Num</label>
+            <input type="number" class="form-control" name="lastIssuedTicketNum" id="field_lastIssuedTicketNum"
+                    ng-model="vm.foodJoint.lastIssuedTicketNum"
+                     />
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="field_estimatWaitPerPerson">Estimat Wait Per Person</label>
+            <input type="number" class="form-control" name="estimatWaitPerPerson" id="field_estimatWaitPerPerson"
+                    ng-model="vm.foodJoint.estimatWaitPerPerson"
+                     />
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="vm.clear()">
+            <span class="glyphicon glyphicon-ban-circle"></span>&nbsp;<span>Cancel</span>
+        </button>
+        <button type="submit" ng-disabled="editForm.$invalid || vm.isSaving" class="btn btn-primary">
+            <span class="glyphicon glyphicon-save"></span>&nbsp;<span>Save</span>
+        </button>
+    </div>
+</form>

@@ -1,0 +1,33 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-one",
+            "relationshipName": "foodOrder",
+            "otherEntityName": "foodOrder",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "payment"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "totalPrice",
+            "fieldType": "BigDecimal"
+        },
+        {
+            "fieldName": "status",
+            "fieldType": "PayStatus",
+            "fieldValues": "UNPAY,PROCESS,DONE,ERROR"
+        },
+        {
+            "fieldName": "paymentInfo",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20161106153908",
+    "entityTableName": "payment",
+    "dto": "no",
+    "pagination": "no",
+    "service": "serviceClass",
+    "searchEngine": "elasticsearch"
+}

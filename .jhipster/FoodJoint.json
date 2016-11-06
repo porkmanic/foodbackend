@@ -1,0 +1,45 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "order",
+            "otherEntityName": "ticket",
+            "otherEntityRelationshipName": "foodJoint"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "menuItem",
+            "otherEntityName": "menuItem",
+            "otherEntityRelationshipName": "foodJoint"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "imageUrl",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "servingNumber",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "lastIssuedTicketNum",
+            "fieldType": "Long"
+        },
+        {
+            "fieldName": "estimatWaitPerPerson",
+            "fieldType": "Float"
+        }
+    ],
+    "changelogDate": "20161106153905",
+    "entityTableName": "food_joint",
+    "dto": "no",
+    "pagination": "no",
+    "service": "serviceClass",
+    "searchEngine": "elasticsearch"
+}

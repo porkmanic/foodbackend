@@ -1,0 +1,68 @@
+<div>
+    <h2>Tickets</h2>
+    <jhi-alert></jhi-alert>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-4 no-padding-left">
+                <button class="btn btn-primary" ui-sref="ticket.new" >
+                    <span class="glyphicon glyphicon-plus"></span>
+                    <span >
+                        Create new Ticket
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <br/>
+    <div class="table-responsive">
+        <table class="jh-table table table-striped">
+            <thead>
+                <tr>
+                    <th><span>ID</span></th>
+                    <th><span>Status</span></th>
+                    <th><span>Food Order</span></th>
+                    <th><span>User</span></th>
+                    <th><span>Food Joint</span></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="ticket in vm.tickets track by ticket.id">
+                    <td><a ui-sref="ticket-detail({id:ticket.id})">{{ticket.id}}</a></td>
+                    <td>{{ticket.status}}</td>
+                    <td>
+                        <a ui-sref="food-order-detail({id:ticket.foodOrder.id})">{{ticket.foodOrder.id}}</a>
+                    </td>
+                    <td>
+                        {{ticket.user.login}}
+                    </td>
+                    <td>
+                        <a ui-sref="food-joint-detail({id:ticket.foodJoint.id})">{{ticket.foodJoint.id}}</a>
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group flex-btn-group-container">
+                            <button type="submit"
+                                    ui-sref="ticket-detail({id:ticket.id})"
+                                    class="btn btn-info btn-sm">
+                                <span class="glyphicon glyphicon-eye-open"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                            <button type="submit"
+                                    ui-sref="ticket.edit({id:ticket.id})"
+                                    class="btn btn-primary btn-sm">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                            <button type="submit"
+                                    ui-sref="ticket.delete({id:ticket.id})"
+                                    class="btn btn-danger btn-sm">
+                                <span class="glyphicon glyphicon-remove-circle"></span>
+                                <span class="hidden-xs hidden-sm"></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

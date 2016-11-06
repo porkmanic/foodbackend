@@ -1,0 +1,38 @@
+{
+    "fluentMethods": true,
+    "relationships": [
+        {
+            "relationshipType": "one-to-one",
+            "relationshipName": "payment",
+            "otherEntityName": "payment",
+            "otherEntityField": "id",
+            "ownerSide": true,
+            "otherEntityRelationshipName": "foodOrder"
+        },
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "orderItem",
+            "otherEntityName": "orderItem",
+            "otherEntityRelationshipName": "foodOrder"
+        },
+        {
+            "relationshipType": "one-to-one",
+            "relationshipName": "ticket",
+            "otherEntityName": "ticket",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "foodOrder"
+        }
+    ],
+    "fields": [
+        {
+            "fieldName": "totalPrice",
+            "fieldType": "BigDecimal"
+        }
+    ],
+    "changelogDate": "20161106153907",
+    "entityTableName": "food_order",
+    "dto": "no",
+    "pagination": "no",
+    "service": "serviceClass",
+    "searchEngine": "elasticsearch"
+}

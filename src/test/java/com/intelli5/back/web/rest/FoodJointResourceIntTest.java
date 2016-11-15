@@ -5,6 +5,7 @@ import com.intelli5.back.FoodininjaApp;
 import com.intelli5.back.domain.FoodJoint;
 import com.intelli5.back.repository.FoodJointRepository;
 import com.intelli5.back.service.FoodJointService;
+import com.intelli5.back.repository.search.FoodJointSearchRepository;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -42,14 +44,13 @@ public class FoodJointResourceIntTest {
     private static final String DEFAULT_NAME = "AAAAA";
     private static final String UPDATED_NAME = "BBBBB";
 
-    private static final String DEFAULT_IMAGE_URL = "AAAAA";
-    private static final String UPDATED_IMAGE_URL = "BBBBB";
+    private static final String DEFAULT_WORKING_HOURS = "AAAAA";
+    private static final String UPDATED_WORKING_HOURS = "BBBBB";
 
-    private static final Long DEFAULT_SERVING_NUMBER = 1L;
-    private static final Long UPDATED_SERVING_NUMBER = 2L;
-
-    private static final Long DEFAULT_LAST_ISSUED_TICKET_NUM = 1L;
-    private static final Long UPDATED_LAST_ISSUED_TICKET_NUM = 2L;
+    private static final byte[] DEFAULT_IMAGE = TestUtil.createByteArray(1, "0");
+    private static final byte[] UPDATED_IMAGE = TestUtil.createByteArray(2, "1");
+    private static final String DEFAULT_IMAGE_CONTENT_TYPE = "image/jpg";
+    private static final String UPDATED_IMAGE_CONTENT_TYPE = "image/png";
 
     private static final Float DEFAULT_ESTIMAT_WAIT_PER_PERSON = 1F;
     private static final Float UPDATED_ESTIMAT_WAIT_PER_PERSON = 2F;
@@ -59,6 +60,9 @@ public class FoodJointResourceIntTest {
 
     @Inject
     private FoodJointService foodJointService;
+
+    @Inject
+    private FoodJointSearchRepository foodJointSearchRepository;
 
     @Inject
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -92,15 +96,16 @@ public class FoodJointResourceIntTest {
     public static FoodJoint createEntity(EntityManager em) {
         FoodJoint foodJoint = new FoodJoint()
                 .name(DEFAULT_NAME)
-                .imageUrl(DEFAULT_IMAGE_URL)
-                .servingNumber(DEFAULT_SERVING_NUMBER)
-                .lastIssuedTicketNum(DEFAULT_LAST_ISSUED_TICKET_NUM)
+                .workingHours(DEFAULT_WORKING_HOURS)
+                .image(DEFAULT_IMAGE)
+                .imageContentType(DEFAULT_IMAGE_CONTENT_TYPE)
                 .estimatWaitPerPerson(DEFAULT_ESTIMAT_WAIT_PER_PERSON);
         return foodJoint;
     }
 
     @Before
     public void initTest() {
+        foodJointSearchRepository.deleteAll();
         foodJoint = createEntity(em);
     }
 
@@ -121,10 +126,14 @@ public class FoodJointResourceIntTest {
         assertThat(foodJoints).hasSize(databaseSizeBeforeCreate + 1);
         FoodJoint testFoodJoint = foodJoints.get(foodJoints.size() - 1);
         assertThat(testFoodJoint.getName()).isEqualTo(DEFAULT_NAME);
-        assertThat(testFoodJoint.getImageUrl()).isEqualTo(DEFAULT_IMAGE_URL);
-        assertThat(testFoodJoint.getServingNumber()).isEqualTo(DEFAULT_SERVING_NUMBER);
-        assertThat(testFoodJoint.getLastIssuedTicketNum()).isEqualTo(DEFAULT_LAST_ISSUED_TICKET_NUM);
+        assertThat(testFoodJoint.getWorkingHours()).isEqualTo(DEFAULT_WORKING_HOURS);
+        assertThat(testFoodJoint.getImage()).isEqualTo(DEFAULT_IMAGE);
+        assertThat(testFoodJoint.getImageContentType()).isEqualTo(DEFAULT_IMAGE_CONTENT_TYPE);
         assertThat(testFoodJoint.getEstimatWaitPerPerson()).isEqualTo(DEFAULT_ESTIMAT_WAIT_PER_PERSON);
+
+        // Validate the FoodJoint in ElasticSearch
+        FoodJoint foodJointEs = foodJointSearchRepository.findOne(testFoodJoint.getId());
+        assertThat(foodJointEs).isEqualToComparingFieldByField(testFoodJoint);
     }
 
     @Test
@@ -139,9 +148,9 @@ public class FoodJointResourceIntTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(foodJoint.getId().intValue())))
                 .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
-                .andExpect(jsonPath("$.[*].imageUrl").value(hasItem(DEFAULT_IMAGE_URL.toString())))
-                .andExpect(jsonPath("$.[*].servingNumber").value(hasItem(DEFAULT_SERVING_NUMBER.intValue())))
-                .andExpect(jsonPath("$.[*].lastIssuedTicketNum").value(hasItem(DEFAULT_LAST_ISSUED_TICKET_NUM.intValue())))
+                .andExpect(jsonPath("$.[*].workingHours").value(hasItem(DEFAULT_WORKING_HOURS.toString())))
+                .andExpect(jsonPath("$.[*].imageContentType").value(hasItem(DEFAULT_IMAGE_CONTENT_TYPE)))
+                .andExpect(jsonPath("$.[*].image").value(hasItem(Base64Utils.encodeToString(DEFAULT_IMAGE))))
                 .andExpect(jsonPath("$.[*].estimatWaitPerPerson").value(hasItem(DEFAULT_ESTIMAT_WAIT_PER_PERSON.doubleValue())));
     }
 
@@ -157,9 +166,9 @@ public class FoodJointResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(foodJoint.getId().intValue()))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
-            .andExpect(jsonPath("$.imageUrl").value(DEFAULT_IMAGE_URL.toString()))
-            .andExpect(jsonPath("$.servingNumber").value(DEFAULT_SERVING_NUMBER.intValue()))
-            .andExpect(jsonPath("$.lastIssuedTicketNum").value(DEFAULT_LAST_ISSUED_TICKET_NUM.intValue()))
+            .andExpect(jsonPath("$.workingHours").value(DEFAULT_WORKING_HOURS.toString()))
+            .andExpect(jsonPath("$.imageContentType").value(DEFAULT_IMAGE_CONTENT_TYPE))
+            .andExpect(jsonPath("$.image").value(Base64Utils.encodeToString(DEFAULT_IMAGE)))
             .andExpect(jsonPath("$.estimatWaitPerPerson").value(DEFAULT_ESTIMAT_WAIT_PER_PERSON.doubleValue()));
     }
 
@@ -183,9 +192,9 @@ public class FoodJointResourceIntTest {
         FoodJoint updatedFoodJoint = foodJointRepository.findOne(foodJoint.getId());
         updatedFoodJoint
                 .name(UPDATED_NAME)
-                .imageUrl(UPDATED_IMAGE_URL)
-                .servingNumber(UPDATED_SERVING_NUMBER)
-                .lastIssuedTicketNum(UPDATED_LAST_ISSUED_TICKET_NUM)
+                .workingHours(UPDATED_WORKING_HOURS)
+                .image(UPDATED_IMAGE)
+                .imageContentType(UPDATED_IMAGE_CONTENT_TYPE)
                 .estimatWaitPerPerson(UPDATED_ESTIMAT_WAIT_PER_PERSON);
 
         restFoodJointMockMvc.perform(put("/api/food-joints")
@@ -198,10 +207,14 @@ public class FoodJointResourceIntTest {
         assertThat(foodJoints).hasSize(databaseSizeBeforeUpdate);
         FoodJoint testFoodJoint = foodJoints.get(foodJoints.size() - 1);
         assertThat(testFoodJoint.getName()).isEqualTo(UPDATED_NAME);
-        assertThat(testFoodJoint.getImageUrl()).isEqualTo(UPDATED_IMAGE_URL);
-        assertThat(testFoodJoint.getServingNumber()).isEqualTo(UPDATED_SERVING_NUMBER);
-        assertThat(testFoodJoint.getLastIssuedTicketNum()).isEqualTo(UPDATED_LAST_ISSUED_TICKET_NUM);
+        assertThat(testFoodJoint.getWorkingHours()).isEqualTo(UPDATED_WORKING_HOURS);
+        assertThat(testFoodJoint.getImage()).isEqualTo(UPDATED_IMAGE);
+        assertThat(testFoodJoint.getImageContentType()).isEqualTo(UPDATED_IMAGE_CONTENT_TYPE);
         assertThat(testFoodJoint.getEstimatWaitPerPerson()).isEqualTo(UPDATED_ESTIMAT_WAIT_PER_PERSON);
+
+        // Validate the FoodJoint in ElasticSearch
+        FoodJoint foodJointEs = foodJointSearchRepository.findOne(testFoodJoint.getId());
+        assertThat(foodJointEs).isEqualToComparingFieldByField(testFoodJoint);
     }
 
     @Test
@@ -217,8 +230,30 @@ public class FoodJointResourceIntTest {
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
+        // Validate ElasticSearch is empty
+        boolean foodJointExistsInEs = foodJointSearchRepository.exists(foodJoint.getId());
+        assertThat(foodJointExistsInEs).isFalse();
+
         // Validate the database is empty
         List<FoodJoint> foodJoints = foodJointRepository.findAll();
         assertThat(foodJoints).hasSize(databaseSizeBeforeDelete - 1);
+    }
+
+    @Test
+    @Transactional
+    public void searchFoodJoint() throws Exception {
+        // Initialize the database
+        foodJointService.save(foodJoint);
+
+        // Search the foodJoint
+        restFoodJointMockMvc.perform(get("/api/_search/food-joints?query=id:" + foodJoint.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(foodJoint.getId().intValue())))
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].workingHours").value(hasItem(DEFAULT_WORKING_HOURS.toString())))
+            .andExpect(jsonPath("$.[*].imageContentType").value(hasItem(DEFAULT_IMAGE_CONTENT_TYPE)))
+            .andExpect(jsonPath("$.[*].image").value(hasItem(Base64Utils.encodeToString(DEFAULT_IMAGE))))
+            .andExpect(jsonPath("$.[*].estimatWaitPerPerson").value(hasItem(DEFAULT_ESTIMAT_WAIT_PER_PERSON.doubleValue())));
     }
 }

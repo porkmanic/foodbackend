@@ -24,12 +24,21 @@
     ],
     "fields": [
         {
+            "fieldName": "number",
+            "fieldType": "Integer"
+        },
+        {
+            "fieldName": "qrCode",
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "image"
+        },
+        {
             "fieldName": "status",
             "fieldType": "TicketStatus",
             "fieldValues": "WAIT,PROCESS,SKIP,FINISH"
         }
     ],
-    "changelogDate": "20161106153904",
+    "changelogDate": "20161113165919",
     "entityTableName": "ticket",
     "dto": "no",
     "pagination": "no",

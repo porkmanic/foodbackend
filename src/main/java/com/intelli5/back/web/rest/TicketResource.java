@@ -16,6 +16,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing Ticket.
@@ -114,5 +118,20 @@ public class TicketResource {
         ticketService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("ticket", id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/tickets?query=:query : search for the ticket corresponding
+     * to the query.
+     *
+     * @param query the query of the ticket search 
+     * @return the result of the search
+     */
+    @GetMapping("/_search/tickets")
+    @Timed
+    public List<Ticket> searchTickets(@RequestParam String query) {
+        log.debug("REST request to search Tickets for query {}", query);
+        return ticketService.search(query);
+    }
+
 
 }

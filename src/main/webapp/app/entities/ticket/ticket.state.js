@@ -95,6 +95,9 @@
                     resolve: {
                         entity: function () {
                             return {
+                                number: null,
+                                qrCode: null,
+                                qrCodeContentType: null,
                                 status: null,
                                 id: null
                             };

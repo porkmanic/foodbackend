@@ -1,6 +1,7 @@
 package com.intelli5.back.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "food_order")
+@Document(indexName = "foodorder")
 public class FoodOrder implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -25,15 +27,15 @@ public class FoodOrder implements Serializable {
     @Column(name = "total_price", precision=10, scale=2)
     private BigDecimal totalPrice;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST,CascadeType.MERGE})
     @JoinColumn(unique = true)
     private Payment payment;
 
-    @OneToMany(mappedBy = "foodOrder")
+    @OneToMany(mappedBy = "foodOrder",cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<OrderItem> orderItems = new HashSet<>();
 
-    @OneToOne(mappedBy = "foodOrder")
+    @OneToOne(mappedBy = "foodOrder",cascade = CascadeType.ALL)
     @JsonIgnore
     private Ticket ticket;
 

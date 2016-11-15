@@ -29,7 +29,7 @@
             "fieldType": "BigDecimal"
         }
     ],
-    "changelogDate": "20161106153907",
+    "changelogDate": "20161113165922",
     "entityTableName": "food_order",
     "dto": "no",
     "pagination": "no",

@@ -5,6 +5,7 @@ import com.intelli5.back.FoodininjaApp;
 import com.intelli5.back.domain.FoodOrder;
 import com.intelli5.back.repository.FoodOrderRepository;
 import com.intelli5.back.service.FoodOrderService;
+import com.intelli5.back.repository.search.FoodOrderSearchRepository;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,9 @@ public class FoodOrderResourceIntTest {
     private FoodOrderService foodOrderService;
 
     @Inject
+    private FoodOrderSearchRepository foodOrderSearchRepository;
+
+    @Inject
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
     @Inject
@@ -86,6 +90,7 @@ public class FoodOrderResourceIntTest {
 
     @Before
     public void initTest() {
+        foodOrderSearchRepository.deleteAll();
         foodOrder = createEntity(em);
     }
 
@@ -106,6 +111,10 @@ public class FoodOrderResourceIntTest {
         assertThat(foodOrders).hasSize(databaseSizeBeforeCreate + 1);
         FoodOrder testFoodOrder = foodOrders.get(foodOrders.size() - 1);
         assertThat(testFoodOrder.getTotalPrice()).isEqualTo(DEFAULT_TOTAL_PRICE);
+
+        // Validate the FoodOrder in ElasticSearch
+        FoodOrder foodOrderEs = foodOrderSearchRepository.findOne(testFoodOrder.getId());
+        assertThat(foodOrderEs).isEqualToComparingFieldByField(testFoodOrder);
     }
 
     @Test
@@ -167,6 +176,10 @@ public class FoodOrderResourceIntTest {
         assertThat(foodOrders).hasSize(databaseSizeBeforeUpdate);
         FoodOrder testFoodOrder = foodOrders.get(foodOrders.size() - 1);
         assertThat(testFoodOrder.getTotalPrice()).isEqualTo(UPDATED_TOTAL_PRICE);
+
+        // Validate the FoodOrder in ElasticSearch
+        FoodOrder foodOrderEs = foodOrderSearchRepository.findOne(testFoodOrder.getId());
+        assertThat(foodOrderEs).isEqualToComparingFieldByField(testFoodOrder);
     }
 
     @Test
@@ -182,8 +195,26 @@ public class FoodOrderResourceIntTest {
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
+        // Validate ElasticSearch is empty
+        boolean foodOrderExistsInEs = foodOrderSearchRepository.exists(foodOrder.getId());
+        assertThat(foodOrderExistsInEs).isFalse();
+
         // Validate the database is empty
         List<FoodOrder> foodOrders = foodOrderRepository.findAll();
         assertThat(foodOrders).hasSize(databaseSizeBeforeDelete - 1);
+    }
+
+    @Test
+    @Transactional
+    public void searchFoodOrder() throws Exception {
+        // Initialize the database
+        foodOrderService.save(foodOrder);
+
+        // Search the foodOrder
+        restFoodOrderMockMvc.perform(get("/api/_search/food-orders?query=id:" + foodOrder.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(foodOrder.getId().intValue())))
+            .andExpect(jsonPath("$.[*].totalPrice").value(hasItem(DEFAULT_TOTAL_PRICE.intValue())));
     }
 }

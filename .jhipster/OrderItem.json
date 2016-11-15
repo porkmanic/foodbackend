@@ -3,6 +3,12 @@
     "relationships": [
         {
             "relationshipType": "many-to-one",
+            "relationshipName": "menuItem",
+            "otherEntityName": "menuItem",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipType": "many-to-one",
             "relationshipName": "foodOrder",
             "otherEntityName": "foodOrder",
             "otherEntityField": "id"
@@ -12,21 +18,9 @@
         {
             "fieldName": "quantity",
             "fieldType": "Integer"
-        },
-        {
-            "fieldName": "name",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "price",
-            "fieldType": "BigDecimal"
-        },
-        {
-            "fieldName": "imageUrl",
-            "fieldType": "String"
         }
     ],
-    "changelogDate": "20161106153909",
+    "changelogDate": "20161113165924",
     "entityTableName": "order_item",
     "dto": "no",
     "pagination": "no",

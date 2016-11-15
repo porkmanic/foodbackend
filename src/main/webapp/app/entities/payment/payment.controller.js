@@ -5,12 +5,14 @@
         .module('foodininjaApp')
         .controller('PaymentController', PaymentController);
 
-    PaymentController.$inject = ['$scope', '$state', 'Payment'];
+    PaymentController.$inject = ['$scope', '$state', 'Payment', 'PaymentSearch'];
 
-    function PaymentController ($scope, $state, Payment) {
+    function PaymentController ($scope, $state, Payment, PaymentSearch) {
         var vm = this;
         
         vm.payments = [];
+        vm.search = search;
+        vm.loadAll = loadAll;
 
         loadAll();
 
@@ -19,5 +21,13 @@
                 vm.payments = result;
             });
         }
-    }
+
+        function search () {
+            if (!vm.searchQuery) {
+                return vm.loadAll();
+            }
+            PaymentSearch.query({query: vm.searchQuery}, function(result) {
+                vm.payments = result;
+            });
+        }    }
 })();

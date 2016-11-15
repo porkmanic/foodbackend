@@ -1,6 +1,7 @@
 package com.intelli5.back.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,6 +14,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "food_joint")
+@Document(indexName = "foodjoint")
 public class FoodJoint implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -24,14 +26,15 @@ public class FoodJoint implements Serializable {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "working_hours")
+    private String workingHours;
 
-    @Column(name = "serving_number")
-    private Long servingNumber;
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
 
-    @Column(name = "last_issued_ticket_num")
-    private Long lastIssuedTicketNum;
+    @Column(name = "image_content_type")
+    private String imageContentType;
 
     @Column(name = "estimat_wait_per_person")
     private Float estimatWaitPerPerson;
@@ -65,43 +68,43 @@ public class FoodJoint implements Serializable {
         this.name = name;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getWorkingHours() {
+        return workingHours;
     }
 
-    public FoodJoint imageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public FoodJoint workingHours(String workingHours) {
+        this.workingHours = workingHours;
         return this;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setWorkingHours(String workingHours) {
+        this.workingHours = workingHours;
     }
 
-    public Long getServingNumber() {
-        return servingNumber;
+    public byte[] getImage() {
+        return image;
     }
 
-    public FoodJoint servingNumber(Long servingNumber) {
-        this.servingNumber = servingNumber;
+    public FoodJoint image(byte[] image) {
+        this.image = image;
         return this;
     }
 
-    public void setServingNumber(Long servingNumber) {
-        this.servingNumber = servingNumber;
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
-    public Long getLastIssuedTicketNum() {
-        return lastIssuedTicketNum;
+    public String getImageContentType() {
+        return imageContentType;
     }
 
-    public FoodJoint lastIssuedTicketNum(Long lastIssuedTicketNum) {
-        this.lastIssuedTicketNum = lastIssuedTicketNum;
+    public FoodJoint imageContentType(String imageContentType) {
+        this.imageContentType = imageContentType;
         return this;
     }
 
-    public void setLastIssuedTicketNum(Long lastIssuedTicketNum) {
-        this.lastIssuedTicketNum = lastIssuedTicketNum;
+    public void setImageContentType(String imageContentType) {
+        this.imageContentType = imageContentType;
     }
 
     public Float getEstimatWaitPerPerson() {
@@ -192,9 +195,9 @@ public class FoodJoint implements Serializable {
         return "FoodJoint{" +
             "id=" + id +
             ", name='" + name + "'" +
-            ", imageUrl='" + imageUrl + "'" +
-            ", servingNumber='" + servingNumber + "'" +
-            ", lastIssuedTicketNum='" + lastIssuedTicketNum + "'" +
+            ", workingHours='" + workingHours + "'" +
+            ", image='" + image + "'" +
+            ", imageContentType='" + imageContentType + "'" +
             ", estimatWaitPerPerson='" + estimatWaitPerPerson + "'" +
             '}';
     }

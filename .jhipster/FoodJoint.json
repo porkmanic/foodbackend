@@ -20,23 +20,20 @@
             "fieldType": "String"
         },
         {
-            "fieldName": "imageUrl",
+            "fieldName": "workingHours",
             "fieldType": "String"
         },
         {
-            "fieldName": "servingNumber",
-            "fieldType": "Long"
-        },
-        {
-            "fieldName": "lastIssuedTicketNum",
-            "fieldType": "Long"
+            "fieldName": "image",
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "image"
         },
         {
             "fieldName": "estimatWaitPerPerson",
             "fieldType": "Float"
         }
     ],
-    "changelogDate": "20161106153905",
+    "changelogDate": "20161113165920",
     "entityTableName": "food_joint",
     "dto": "no",
     "pagination": "no",

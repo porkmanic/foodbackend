@@ -12,9 +12,18 @@
         <dd>
             <span>{{vm.menuItem.price}}</span>
         </dd>
-        <dt><span>Image Url</span></dt>
+        <dt><span>Image</span></dt>
         <dd>
-            <span>{{vm.menuItem.imageUrl}}</span>
+            <div ng-if="vm.menuItem.image">
+                <a ng-click="vm.openFile(vm.menuItem.imageContentType, vm.menuItem.image)">
+                    <img data-ng-src="{{'data:' + vm.menuItem.imageContentType + ';base64,' + vm.menuItem.image}}" style="max-width: 100%;"/>
+                </a>
+                {{vm.menuItem.imageContentType}}, {{vm.byteSize(vm.menuItem.image)}}
+            </div>
+        </dd>
+        <dt><span>Description</span></dt>
+        <dd>
+            <span>{{vm.menuItem.description}}</span>
         </dd>
         <dt><span>Food Joint</span></dt>
         <dd>

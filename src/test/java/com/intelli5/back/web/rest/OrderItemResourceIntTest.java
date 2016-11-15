@@ -5,6 +5,7 @@ import com.intelli5.back.FoodininjaApp;
 import com.intelli5.back.domain.OrderItem;
 import com.intelli5.back.repository.OrderItemRepository;
 import com.intelli5.back.service.OrderItemService;
+import com.intelli5.back.repository.search.OrderItemSearchRepository;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,20 +43,14 @@ public class OrderItemResourceIntTest {
     private static final Integer DEFAULT_QUANTITY = 1;
     private static final Integer UPDATED_QUANTITY = 2;
 
-    private static final String DEFAULT_NAME = "AAAAA";
-    private static final String UPDATED_NAME = "BBBBB";
-
-    private static final BigDecimal DEFAULT_PRICE = new BigDecimal(1);
-    private static final BigDecimal UPDATED_PRICE = new BigDecimal(2);
-
-    private static final String DEFAULT_IMAGE_URL = "AAAAA";
-    private static final String UPDATED_IMAGE_URL = "BBBBB";
-
     @Inject
     private OrderItemRepository orderItemRepository;
 
     @Inject
     private OrderItemService orderItemService;
+
+    @Inject
+    private OrderItemSearchRepository orderItemSearchRepository;
 
     @Inject
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -89,15 +83,13 @@ public class OrderItemResourceIntTest {
      */
     public static OrderItem createEntity(EntityManager em) {
         OrderItem orderItem = new OrderItem()
-                .quantity(DEFAULT_QUANTITY)
-                .name(DEFAULT_NAME)
-                .price(DEFAULT_PRICE)
-                .imageUrl(DEFAULT_IMAGE_URL);
+                .quantity(DEFAULT_QUANTITY);
         return orderItem;
     }
 
     @Before
     public void initTest() {
+        orderItemSearchRepository.deleteAll();
         orderItem = createEntity(em);
     }
 
@@ -118,9 +110,10 @@ public class OrderItemResourceIntTest {
         assertThat(orderItems).hasSize(databaseSizeBeforeCreate + 1);
         OrderItem testOrderItem = orderItems.get(orderItems.size() - 1);
         assertThat(testOrderItem.getQuantity()).isEqualTo(DEFAULT_QUANTITY);
-        assertThat(testOrderItem.getName()).isEqualTo(DEFAULT_NAME);
-        assertThat(testOrderItem.getPrice()).isEqualTo(DEFAULT_PRICE);
-        assertThat(testOrderItem.getImageUrl()).isEqualTo(DEFAULT_IMAGE_URL);
+
+        // Validate the OrderItem in ElasticSearch
+        OrderItem orderItemEs = orderItemSearchRepository.findOne(testOrderItem.getId());
+        assertThat(orderItemEs).isEqualToComparingFieldByField(testOrderItem);
     }
 
     @Test
@@ -134,10 +127,7 @@ public class OrderItemResourceIntTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(orderItem.getId().intValue())))
-                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_QUANTITY)))
-                .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
-                .andExpect(jsonPath("$.[*].price").value(hasItem(DEFAULT_PRICE.intValue())))
-                .andExpect(jsonPath("$.[*].imageUrl").value(hasItem(DEFAULT_IMAGE_URL.toString())));
+                .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_QUANTITY)));
     }
 
     @Test
@@ -151,10 +141,7 @@ public class OrderItemResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(orderItem.getId().intValue()))
-            .andExpect(jsonPath("$.quantity").value(DEFAULT_QUANTITY))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
-            .andExpect(jsonPath("$.price").value(DEFAULT_PRICE.intValue()))
-            .andExpect(jsonPath("$.imageUrl").value(DEFAULT_IMAGE_URL.toString()));
+            .andExpect(jsonPath("$.quantity").value(DEFAULT_QUANTITY));
     }
 
     @Test
@@ -176,10 +163,7 @@ public class OrderItemResourceIntTest {
         // Update the orderItem
         OrderItem updatedOrderItem = orderItemRepository.findOne(orderItem.getId());
         updatedOrderItem
-                .quantity(UPDATED_QUANTITY)
-                .name(UPDATED_NAME)
-                .price(UPDATED_PRICE)
-                .imageUrl(UPDATED_IMAGE_URL);
+                .quantity(UPDATED_QUANTITY);
 
         restOrderItemMockMvc.perform(put("/api/order-items")
                 .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -191,9 +175,10 @@ public class OrderItemResourceIntTest {
         assertThat(orderItems).hasSize(databaseSizeBeforeUpdate);
         OrderItem testOrderItem = orderItems.get(orderItems.size() - 1);
         assertThat(testOrderItem.getQuantity()).isEqualTo(UPDATED_QUANTITY);
-        assertThat(testOrderItem.getName()).isEqualTo(UPDATED_NAME);
-        assertThat(testOrderItem.getPrice()).isEqualTo(UPDATED_PRICE);
-        assertThat(testOrderItem.getImageUrl()).isEqualTo(UPDATED_IMAGE_URL);
+
+        // Validate the OrderItem in ElasticSearch
+        OrderItem orderItemEs = orderItemSearchRepository.findOne(testOrderItem.getId());
+        assertThat(orderItemEs).isEqualToComparingFieldByField(testOrderItem);
     }
 
     @Test
@@ -209,8 +194,26 @@ public class OrderItemResourceIntTest {
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
+        // Validate ElasticSearch is empty
+        boolean orderItemExistsInEs = orderItemSearchRepository.exists(orderItem.getId());
+        assertThat(orderItemExistsInEs).isFalse();
+
         // Validate the database is empty
         List<OrderItem> orderItems = orderItemRepository.findAll();
         assertThat(orderItems).hasSize(databaseSizeBeforeDelete - 1);
+    }
+
+    @Test
+    @Transactional
+    public void searchOrderItem() throws Exception {
+        // Initialize the database
+        orderItemService.save(orderItem);
+
+        // Search the orderItem
+        restOrderItemMockMvc.perform(get("/api/_search/order-items?query=id:" + orderItem.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(orderItem.getId().intValue())))
+            .andExpect(jsonPath("$.[*].quantity").value(hasItem(DEFAULT_QUANTITY)));
     }
 }

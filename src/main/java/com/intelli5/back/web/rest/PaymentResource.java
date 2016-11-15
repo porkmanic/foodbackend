@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.elasticsearch.index.query.QueryBuilders.*;
+
 /**
  * REST controller for managing Payment.
  */
@@ -121,5 +123,20 @@ public class PaymentResource {
         paymentService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("payment", id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/payments?query=:query : search for the payment corresponding
+     * to the query.
+     *
+     * @param query the query of the payment search 
+     * @return the result of the search
+     */
+    @GetMapping("/_search/payments")
+    @Timed
+    public List<Payment> searchPayments(@RequestParam String query) {
+        log.debug("REST request to search Payments for query {}", query);
+        return paymentService.search(query);
+    }
+
 
 }

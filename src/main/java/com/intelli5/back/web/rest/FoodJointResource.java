@@ -16,6 +16,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing FoodJoint.
@@ -25,7 +29,7 @@ import java.util.Optional;
 public class FoodJointResource {
 
     private final Logger log = LoggerFactory.getLogger(FoodJointResource.class);
-        
+
     @Inject
     private FoodJointService foodJointService;
 
@@ -114,5 +118,20 @@ public class FoodJointResource {
         foodJointService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("foodJoint", id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/food-joints?query=:query : search for the foodJoint corresponding
+     * to the query.
+     *
+     * @param query the query of the foodJoint search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/food-joints")
+    @Timed
+    public List<FoodJoint> searchFoodJoints(@RequestParam String query) {
+        log.debug("REST request to search FoodJoints for query {}", query);
+        return foodJointService.search(query);
+    }
+
 
 }

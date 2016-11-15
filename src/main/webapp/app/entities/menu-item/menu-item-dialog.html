@@ -25,10 +25,32 @@
                     ng-model="vm.menuItem.price"
                      />
         </div>
+        <div class="form-group" ngf-drop ngf-change="vm.setImage($file, vm.menuItem)" ngf-pattern="'image/*'">
+            <label class="control-label" for="field_image">Image</label>
+            <div>
+                <img data-ng-src="{{'data:' + vm.menuItem.imageContentType + ';base64,' + vm.menuItem.image}}" style="max-height: 100px;" ng-if="vm.menuItem.image"/>
+                <div ng-if="vm.menuItem.image" class="help-block clearfix">
+                    <span class="pull-left">{{vm.menuItem.imageContentType}}, {{vm.byteSize(vm.menuItem.image)}}</span>
+                    <button type="button" ng-click="vm.menuItem.image=null;vm.menuItem.imageContentType=null;"
+                            class="btn btn-default btn-xs pull-right">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </div>
+                <button type="button" ngf-select class="btn btn-default btn-block"
+                        ngf-change="vm.setImage($file, vm.menuItem)" accept="image/*">
+                    Add image
+                </button>
+            </div>
+            <input type="hidden" class="form-control" name="image" id="field_image"
+                    ng-model="vm.menuItem.image"
+                     />
+            <input type="hidden" class="form-control" name="imageContentType" id="field_imageContentType"
+                    ng-model="vm.menuItem.imageContentType" />
+        </div>
         <div class="form-group">
-            <label class="control-label" for="field_imageUrl">Image Url</label>
-            <input type="text" class="form-control" name="imageUrl" id="field_imageUrl"
-                    ng-model="vm.menuItem.imageUrl"
+            <label class="control-label" for="field_description">Description</label>
+            <input type="text" class="form-control" name="description" id="field_description"
+                    ng-model="vm.menuItem.description"
                      />
         </div>
 

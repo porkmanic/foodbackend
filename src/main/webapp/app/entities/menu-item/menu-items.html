@@ -6,10 +6,27 @@
             <div class="col-xs-4 no-padding-left">
                 <button class="btn btn-primary" ui-sref="menu-item.new" >
                     <span class="glyphicon glyphicon-plus"></span>
-                    <span >
+                    <span class="hidden-xs" >
                         Create new Menu Item
                     </span>
                 </button>
+            </div>
+            <div class="col-xs-8 no-padding-right">
+                <form name="searchForm" class="form-inline">
+                    <div class="input-group pull-right" >
+                        <input type="text" class="form-control" ng-model="vm.searchQuery" id="searchQuery" placeholder="Query">
+                        <span  class="input-group-btn width-min" >
+                            <button class="btn btn-info" ng-click="vm.search(vm.searchQuery)">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>
+                        <span class="input-group-btn width-min" ng-if="vm.currentSearch">
+                            <button class="btn btn-info" ng-click="vm.clear()">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </span>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -21,7 +38,8 @@
                     <th><span>ID</span></th>
                     <th><span>Name</span></th>
                     <th><span>Price</span></th>
-                    <th><span>Image Url</span></th>
+                    <th><span>Image</span></th>
+                    <th><span>Description</span></th>
                     <th><span>Food Joint</span></th>
                     <th></th>
                 </tr>
@@ -31,7 +49,13 @@
                     <td><a ui-sref="menu-item-detail({id:menuItem.id})">{{menuItem.id}}</a></td>
                     <td>{{menuItem.name}}</td>
                     <td>{{menuItem.price}}</td>
-                    <td>{{menuItem.imageUrl}}</td>
+                    <td>
+                        <a ng-if="menuItem.image" ng-click="vm.openFile(menuItem.imageContentType, menuItem.image)">
+                            <img data-ng-src="{{'data:' + menuItem.imageContentType + ';base64,' + menuItem.image}}" style="max-height: 30px;"/>
+                        </a>
+                        <span ng-if="menuItem.image">{{menuItem.imageContentType}}, {{vm.byteSize(menuItem.image)}}</span>
+                    </td>
+                    <td>{{menuItem.description}}</td>
                     <td>
                         <a ui-sref="food-joint-detail({id:menuItem.foodJoint.id})">{{menuItem.foodJoint.id}}</a>
                     </td>

@@ -1,5 +1,6 @@
 package com.intelli5.back.domain;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "menu_item")
+@Document(indexName = "menuitem")
 public class MenuItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -25,8 +27,15 @@ public class MenuItem implements Serializable {
     @Column(name = "price", precision=10, scale=2)
     private BigDecimal price;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
+
+    @Column(name = "image_content_type")
+    private String imageContentType;
+
+    @Column(name = "description")
+    private String description;
 
     @ManyToOne
     private FoodJoint foodJoint;
@@ -65,17 +74,43 @@ public class MenuItem implements Serializable {
         this.price = price;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public byte[] getImage() {
+        return image;
     }
 
-    public MenuItem imageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public MenuItem image(byte[] image) {
+        this.image = image;
         return this;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public String getImageContentType() {
+        return imageContentType;
+    }
+
+    public MenuItem imageContentType(String imageContentType) {
+        this.imageContentType = imageContentType;
+        return this;
+    }
+
+    public void setImageContentType(String imageContentType) {
+        this.imageContentType = imageContentType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public MenuItem description(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public FoodJoint getFoodJoint() {
@@ -117,7 +152,9 @@ public class MenuItem implements Serializable {
             "id=" + id +
             ", name='" + name + "'" +
             ", price='" + price + "'" +
-            ", imageUrl='" + imageUrl + "'" +
+            ", image='" + image + "'" +
+            ", imageContentType='" + imageContentType + "'" +
+            ", description='" + description + "'" +
             '}';
     }
 }

@@ -1,5 +1,6 @@
 package com.intelli5.back.domain;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import com.intelli5.back.domain.enumeration.TicketStatus;
  */
 @Entity
 @Table(name = "ticket")
+@Document(indexName = "ticket")
 public class Ticket implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -19,6 +21,16 @@ public class Ticket implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(name = "number")
+    private Integer number;
+
+    @Lob
+    @Column(name = "qr_code")
+    private byte[] qrCode;
+
+    @Column(name = "qr_code_content_type")
+    private String qrCodeContentType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -40,6 +52,45 @@ public class Ticket implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Integer getNumber() {
+        return number;
+    }
+
+    public Ticket number(Integer number) {
+        this.number = number;
+        return this;
+    }
+
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
+
+    public byte[] getQrCode() {
+        return qrCode;
+    }
+
+    public Ticket qrCode(byte[] qrCode) {
+        this.qrCode = qrCode;
+        return this;
+    }
+
+    public void setQrCode(byte[] qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public String getQrCodeContentType() {
+        return qrCodeContentType;
+    }
+
+    public Ticket qrCodeContentType(String qrCodeContentType) {
+        this.qrCodeContentType = qrCodeContentType;
+        return this;
+    }
+
+    public void setQrCodeContentType(String qrCodeContentType) {
+        this.qrCodeContentType = qrCodeContentType;
     }
 
     public TicketStatus getStatus() {
@@ -118,6 +169,9 @@ public class Ticket implements Serializable {
     public String toString() {
         return "Ticket{" +
             "id=" + id +
+            ", number='" + number + "'" +
+            ", qrCode='" + qrCode + "'" +
+            ", qrCodeContentType='" + qrCodeContentType + "'" +
             ", status='" + status + "'" +
             '}';
     }

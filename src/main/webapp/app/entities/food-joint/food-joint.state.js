@@ -96,9 +96,9 @@
                         entity: function () {
                             return {
                                 name: null,
-                                imageUrl: null,
-                                servingNumber: null,
-                                lastIssuedTicketNum: null,
+                                workingHours: null,
+                                image: null,
+                                imageContentType: null,
                                 estimatWaitPerPerson: null,
                                 id: null
                             };

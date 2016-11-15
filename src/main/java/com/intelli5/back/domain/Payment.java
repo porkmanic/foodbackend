@@ -1,6 +1,7 @@
 package com.intelli5.back.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import com.intelli5.back.domain.enumeration.PayStatus;
  */
 @Entity
 @Table(name = "payment")
+@Document(indexName = "payment")
 public class Payment implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -1,19 +1,21 @@
 entity Ticket {
+	number Integer,
+    qrCode ImageBlob,
     status TicketStatus
 }
 
 entity FoodJoint {
 	name String,
-    imageURL String,
-    servingNumber Long,
-    lastIssuedTicketNum Long,
+    workingHours String,
+    image ImageBlob,
     estimatWaitPerPerson Float
 }
 
 entity MenuItem {
 	name String,
 	price BigDecimal,
-	imageURL String
+	image ImageBlob,
+    description String
 }
 
 entity FoodOrder {
@@ -27,10 +29,7 @@ entity Payment {
 }
 
 entity OrderItem {
-	quantity Integer,
-    name String,
-	price BigDecimal,
-	imageURL String
+	quantity Integer
 }
 
 enum TicketStatus {
@@ -43,6 +42,10 @@ enum PayStatus {
 
 relationship ManyToOne {
 	Ticket{user(login)} to User{ticket}
+}
+
+relationship ManyToOne {
+	OrderItem{menuItem} to MenuItem
 }
 
 relationship OneToOne {

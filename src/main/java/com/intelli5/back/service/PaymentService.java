@@ -2,6 +2,7 @@ package com.intelli5.back.service;
 
 import com.intelli5.back.domain.Payment;
 import com.intelli5.back.repository.PaymentRepository;
+import com.intelli5.back.repository.search.PaymentSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,8 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * Service Implementation for managing Payment.
@@ -24,6 +27,9 @@ public class PaymentService {
     @Inject
     private PaymentRepository paymentRepository;
 
+    @Inject
+    private PaymentSearchRepository paymentSearchRepository;
+
     /**
      * Save a payment.
      *
@@ -33,6 +39,7 @@ public class PaymentService {
     public Payment save(Payment payment) {
         log.debug("Request to save Payment : {}", payment);
         Payment result = paymentRepository.save(payment);
+        paymentSearchRepository.save(result);
         return result;
     }
 
@@ -84,5 +91,20 @@ public class PaymentService {
     public void delete(Long id) {
         log.debug("Request to delete Payment : {}", id);
         paymentRepository.delete(id);
+        paymentSearchRepository.delete(id);
+    }
+
+    /**
+     * Search for the payment corresponding to the query.
+     *
+     *  @param query the query of the search
+     *  @return the list of entities
+     */
+    @Transactional(readOnly = true)
+    public List<Payment> search(String query) {
+        log.debug("Request to search Payments for query {}", query);
+        return StreamSupport
+            .stream(paymentSearchRepository.search(queryStringQuery(query)).spliterator(), false)
+            .collect(Collectors.toList());
     }
 }

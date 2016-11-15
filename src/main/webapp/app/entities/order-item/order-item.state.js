@@ -96,9 +96,6 @@
                         entity: function () {
                             return {
                                 quantity: null,
-                                name: null,
-                                price: null,
-                                imageUrl: null,
                                 id: null
                             };
                         }

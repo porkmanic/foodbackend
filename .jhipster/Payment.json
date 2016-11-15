@@ -24,7 +24,7 @@
             "fieldType": "String"
         }
     ],
-    "changelogDate": "20161106153908",
+    "changelogDate": "20161113165923",
     "entityTableName": "payment",
     "dto": "no",
     "pagination": "no",

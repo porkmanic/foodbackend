@@ -2,6 +2,7 @@ package com.intelli5.back.service;
 
 import com.intelli5.back.domain.Ticket;
 import com.intelli5.back.repository.TicketRepository;
+import com.intelli5.back.repository.search.TicketSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * Service Implementation for managing Ticket.
@@ -22,6 +27,9 @@ public class TicketService {
     @Inject
     private TicketRepository ticketRepository;
 
+    @Inject
+    private TicketSearchRepository ticketSearchRepository;
+
     /**
      * Save a ticket.
      *
@@ -31,6 +39,7 @@ public class TicketService {
     public Ticket save(Ticket ticket) {
         log.debug("Request to save Ticket : {}", ticket);
         Ticket result = ticketRepository.save(ticket);
+        ticketSearchRepository.save(result);
         return result;
     }
 
@@ -68,5 +77,20 @@ public class TicketService {
     public void delete(Long id) {
         log.debug("Request to delete Ticket : {}", id);
         ticketRepository.delete(id);
+        ticketSearchRepository.delete(id);
+    }
+
+    /**
+     * Search for the ticket corresponding to the query.
+     *
+     *  @param query the query of the search
+     *  @return the list of entities
+     */
+    @Transactional(readOnly = true)
+    public List<Ticket> search(String query) {
+        log.debug("Request to search Tickets for query {}", query);
+        return StreamSupport
+            .stream(ticketSearchRepository.search(queryStringQuery(query)).spliterator(), false)
+            .collect(Collectors.toList());
     }
 }

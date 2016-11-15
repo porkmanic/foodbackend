@@ -4,6 +4,7 @@ import com.intelli5.back.config.Constants;
 import com.codahale.metrics.annotation.Timed;
 import com.intelli5.back.domain.User;
 import com.intelli5.back.repository.UserRepository;
+import com.intelli5.back.repository.search.UserSearchRepository;
 import com.intelli5.back.security.AuthoritiesConstants;
 import com.intelli5.back.service.MailService;
 import com.intelli5.back.service.UserService;
@@ -26,6 +27,9 @@ import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing users.
@@ -65,6 +69,9 @@ public class UserResource {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private UserSearchRepository userSearchRepository;
 
     /**
      * POST  /users  : Creates a new user.
@@ -187,5 +194,20 @@ public class UserResource {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
         return ResponseEntity.ok().headers(HeaderUtil.createAlert( "A user is deleted with identifier " + login, login)).build();
+    }
+
+    /**
+     * SEARCH  /_search/users/:query : search for the User corresponding
+     * to the query.
+     *
+     * @param query the query to search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/users/{query}")
+    @Timed
+    public List<User> search(@PathVariable String query) {
+        return StreamSupport
+            .stream(userSearchRepository.search(queryStringQuery(query)).spliterator(), false)
+            .collect(Collectors.toList());
     }
 }

@@ -3,6 +3,7 @@ package com.intelli5.back.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import com.intelli5.back.domain.MenuItem;
 import com.intelli5.back.service.MenuItemService;
+import com.intelli5.back.service.dto.ItemDTO;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing MenuItem.
@@ -25,7 +31,7 @@ import java.util.Optional;
 public class MenuItemResource {
 
     private final Logger log = LoggerFactory.getLogger(MenuItemResource.class);
-        
+
     @Inject
     private MenuItemService menuItemService;
 
@@ -47,6 +53,20 @@ public class MenuItemResource {
         return ResponseEntity.created(new URI("/api/menu-items/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("menuItem", result.getId().toString()))
             .body(result);
+    }
+
+    /**
+     * POST  /menu-items : Create a new menuItem.
+     *
+     * @param itemDTOs the itemDTOs to get price
+     * @return the ResponseEntity with status 201 (Created) and with body the new menuItem, or with status 400 (Bad Request) if the menuItem has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/menu-items/price")
+    @Timed
+    public BigDecimal getPrice(@RequestBody List<ItemDTO> itemDTOs) throws URISyntaxException {
+        log.debug("REST request to get price : {}", itemDTOs);
+        return menuItemService.getPrice(itemDTOs);
     }
 
     /**
@@ -84,6 +104,18 @@ public class MenuItemResource {
     }
 
     /**
+     * GET  /menu-items/food-joint/:id : get all the menuItems.
+     *
+     * @return the ResponseEntity with status 200 (OK) and the list of menuItems in body
+     */
+    @GetMapping("/menu-items/food-joint/{id}")
+    @Timed
+    public List<MenuItem> findByFoodJoint_Id(@PathVariable Long id) {
+        log.debug("REST request to get findByFoodJoint_Id {}", id);
+        return menuItemService.findByFoodJoint_Id(id);
+    }
+
+    /**
      * GET  /menu-items/:id : get the "id" menuItem.
      *
      * @param id the id of the menuItem to retrieve
@@ -114,5 +146,20 @@ public class MenuItemResource {
         menuItemService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("menuItem", id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/menu-items?query=:query : search for the menuItem corresponding
+     * to the query.
+     *
+     * @param query the query of the menuItem search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/menu-items")
+    @Timed
+    public List<MenuItem> searchMenuItems(@RequestParam String query) {
+        log.debug("REST request to search MenuItems for query {}", query);
+        return menuItemService.search(query);
+    }
+
 
 }

@@ -24,7 +24,7 @@ spring:
         serialization.indent_output: true
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
-        url: jdbc:mysql://localhost:3306/food?useUnicode=true&characterEncoding=utf8&useSSL=false
+        url: jdbc:mysql://localhost:3306/foodininja?useUnicode=true&characterEncoding=utf8&useSSL=false
         name:
         username: root
         password: 1234
@@ -42,6 +42,14 @@ spring:
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: true
+    data:
+        elasticsearch:
+            cluster-name:
+            cluster-nodes:
+            properties:
+                path:
+                  logs: target/elasticsearch/log
+                  data: target/elasticsearch/data
     mail:
         host: localhost
         port: 25
@@ -66,7 +74,7 @@ jhipster:
     security:
         rememberMe:
             # security key (this key should be unique for your application, and kept secret)
-            key: 3f332e95dfe0f9ffe5088ff434334ca5d3102556
+            key: e0080c4d046826edf5d0d053a6f2c140a8ef8910
     mail: # specific JHipster mail property, for standard properties see MailProperties
         from: foodininja@localhost
     metrics: # DropWizard Metrics configuration, used by MetricsConfiguration

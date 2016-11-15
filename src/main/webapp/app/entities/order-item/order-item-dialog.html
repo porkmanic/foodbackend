@@ -19,25 +19,13 @@
                     ng-model="vm.orderItem.quantity"
                      />
         </div>
-        <div class="form-group">
-            <label class="control-label" for="field_name">Name</label>
-            <input type="text" class="form-control" name="name" id="field_name"
-                    ng-model="vm.orderItem.name"
-                     />
-        </div>
-        <div class="form-group">
-            <label class="control-label" for="field_price">Price</label>
-            <input type="number" class="form-control" name="price" id="field_price"
-                    ng-model="vm.orderItem.price"
-                     />
-        </div>
-        <div class="form-group">
-            <label class="control-label" for="field_imageUrl">Image Url</label>
-            <input type="text" class="form-control" name="imageUrl" id="field_imageUrl"
-                    ng-model="vm.orderItem.imageUrl"
-                     />
-        </div>
 
+        <div class="form-group">
+            <label for="field_menuItem">Menu Item</label>
+            <select class="form-control" id="field_menuItem" name="menuItem" ng-model="vm.orderItem.menuItem" ng-options="menuItem as menuItem.id for menuItem in vm.menuitems track by menuItem.id">
+                <option value=""></option>
+            </select>
+        </div>
         <div class="form-group">
             <label for="field_foodOrder">Food Order</label>
             <select class="form-control" id="field_foodOrder" name="foodOrder" ng-model="vm.orderItem.foodOrder" ng-options="foodOrder as foodOrder.id for foodOrder in vm.foodorders track by foodOrder.id">

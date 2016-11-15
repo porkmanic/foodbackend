@@ -6,10 +6,27 @@
             <div class="col-xs-4 no-padding-left">
                 <button class="btn btn-primary" ui-sref="ticket.new" >
                     <span class="glyphicon glyphicon-plus"></span>
-                    <span >
+                    <span class="hidden-xs" >
                         Create new Ticket
                     </span>
                 </button>
+            </div>
+            <div class="col-xs-8 no-padding-right">
+                <form name="searchForm" class="form-inline">
+                    <div class="input-group pull-right" >
+                        <input type="text" class="form-control" ng-model="vm.searchQuery" id="searchQuery" placeholder="Query">
+                        <span  class="input-group-btn width-min" >
+                            <button class="btn btn-info" ng-click="vm.search(vm.searchQuery)">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </span>
+                        <span class="input-group-btn width-min" ng-if="vm.currentSearch">
+                            <button class="btn btn-info" ng-click="vm.clear()">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </span>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -19,6 +36,8 @@
             <thead>
                 <tr>
                     <th><span>ID</span></th>
+                    <th><span>Number</span></th>
+                    <th><span>Qr Code</span></th>
                     <th><span>Status</span></th>
                     <th><span>Food Order</span></th>
                     <th><span>User</span></th>
@@ -29,6 +48,13 @@
             <tbody>
                 <tr ng-repeat="ticket in vm.tickets track by ticket.id">
                     <td><a ui-sref="ticket-detail({id:ticket.id})">{{ticket.id}}</a></td>
+                    <td>{{ticket.number}}</td>
+                    <td>
+                        <a ng-if="ticket.qrCode" ng-click="vm.openFile(ticket.qrCodeContentType, ticket.qrCode)">
+                            <img data-ng-src="{{'data:' + ticket.qrCodeContentType + ';base64,' + ticket.qrCode}}" style="max-height: 30px;"/>
+                        </a>
+                        <span ng-if="ticket.qrCode">{{ticket.qrCodeContentType}}, {{vm.byteSize(ticket.qrCode)}}</span>
+                    </td>
                     <td>{{ticket.status}}</td>
                     <td>
                         <a ui-sref="food-order-detail({id:ticket.foodOrder.id})">{{ticket.foodOrder.id}}</a>

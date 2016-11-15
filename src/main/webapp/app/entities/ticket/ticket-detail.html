@@ -4,6 +4,19 @@
     <hr>
     <jhi-alert-error></jhi-alert-error>
     <dl class="dl-horizontal jh-entity-details">
+        <dt><span>Number</span></dt>
+        <dd>
+            <span>{{vm.ticket.number}}</span>
+        </dd>
+        <dt><span>Qr Code</span></dt>
+        <dd>
+            <div ng-if="vm.ticket.qrCode">
+                <a ng-click="vm.openFile(vm.ticket.qrCodeContentType, vm.ticket.qrCode)">
+                    <img data-ng-src="{{'data:' + vm.ticket.qrCodeContentType + ';base64,' + vm.ticket.qrCode}}" style="max-width: 100%;"/>
+                </a>
+                {{vm.ticket.qrCodeContentType}}, {{vm.byteSize(vm.ticket.qrCode)}}
+            </div>
+        </dd>
         <dt><span>Status</span></dt>
         <dd>
             <span>{{vm.ticket.status}}</span>

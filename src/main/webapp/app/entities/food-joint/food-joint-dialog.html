@@ -20,22 +20,32 @@
                      />
         </div>
         <div class="form-group">
-            <label class="control-label" for="field_imageUrl">Image Url</label>
-            <input type="text" class="form-control" name="imageUrl" id="field_imageUrl"
-                    ng-model="vm.foodJoint.imageUrl"
+            <label class="control-label" for="field_workingHours">Working Hours</label>
+            <input type="text" class="form-control" name="workingHours" id="field_workingHours"
+                    ng-model="vm.foodJoint.workingHours"
                      />
         </div>
-        <div class="form-group">
-            <label class="control-label" for="field_servingNumber">Serving Number</label>
-            <input type="number" class="form-control" name="servingNumber" id="field_servingNumber"
-                    ng-model="vm.foodJoint.servingNumber"
+        <div class="form-group" ngf-drop ngf-change="vm.setImage($file, vm.foodJoint)" ngf-pattern="'image/*'">
+            <label class="control-label" for="field_image">Image</label>
+            <div>
+                <img data-ng-src="{{'data:' + vm.foodJoint.imageContentType + ';base64,' + vm.foodJoint.image}}" style="max-height: 100px;" ng-if="vm.foodJoint.image"/>
+                <div ng-if="vm.foodJoint.image" class="help-block clearfix">
+                    <span class="pull-left">{{vm.foodJoint.imageContentType}}, {{vm.byteSize(vm.foodJoint.image)}}</span>
+                    <button type="button" ng-click="vm.foodJoint.image=null;vm.foodJoint.imageContentType=null;"
+                            class="btn btn-default btn-xs pull-right">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </div>
+                <button type="button" ngf-select class="btn btn-default btn-block"
+                        ngf-change="vm.setImage($file, vm.foodJoint)" accept="image/*">
+                    Add image
+                </button>
+            </div>
+            <input type="hidden" class="form-control" name="image" id="field_image"
+                    ng-model="vm.foodJoint.image"
                      />
-        </div>
-        <div class="form-group">
-            <label class="control-label" for="field_lastIssuedTicketNum">Last Issued Ticket Num</label>
-            <input type="number" class="form-control" name="lastIssuedTicketNum" id="field_lastIssuedTicketNum"
-                    ng-model="vm.foodJoint.lastIssuedTicketNum"
-                     />
+            <input type="hidden" class="form-control" name="imageContentType" id="field_imageContentType"
+                    ng-model="vm.foodJoint.imageContentType" />
         </div>
         <div class="form-group">
             <label class="control-label" for="field_estimatWaitPerPerson">Estimat Wait Per Person</label>

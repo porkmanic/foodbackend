@@ -5,6 +5,7 @@ import com.intelli5.back.domain.User;
 import com.intelli5.back.repository.AuthorityRepository;
 import com.intelli5.back.repository.PersistentTokenRepository;
 import com.intelli5.back.repository.UserRepository;
+import com.intelli5.back.repository.search.UserSearchRepository;
 import com.intelli5.back.security.AuthoritiesConstants;
 import com.intelli5.back.security.SecurityUtils;
 import com.intelli5.back.service.util.RandomUtil;
@@ -40,6 +41,9 @@ public class UserService {
     private UserRepository userRepository;
 
     @Inject
+    private UserSearchRepository userSearchRepository;
+
+    @Inject
     private PersistentTokenRepository persistentTokenRepository;
 
     @Inject
@@ -53,6 +57,7 @@ public class UserService {
                 user.setActivated(true);
                 user.setActivationKey(null);
                 userRepository.save(user);
+                userSearchRepository.save(user);
                 log.debug("Activated user: {}", user);
                 return user;
             });
@@ -107,6 +112,7 @@ public class UserService {
         authorities.add(authority);
         newUser.setAuthorities(authorities);
         userRepository.save(newUser);
+        userSearchRepository.save(newUser);
         log.debug("Created Information for User: {}", newUser);
         return newUser;
     }
@@ -135,6 +141,7 @@ public class UserService {
         user.setResetDate(ZonedDateTime.now());
         user.setActivated(true);
         userRepository.save(user);
+        userSearchRepository.save(user);
         log.debug("Created Information for User: {}", user);
         return user;
     }
@@ -146,6 +153,7 @@ public class UserService {
             u.setEmail(email);
             u.setLangKey(langKey);
             userRepository.save(u);
+            userSearchRepository.save(u);
             log.debug("Changed Information for User: {}", u);
         });
     }
@@ -175,6 +183,7 @@ public class UserService {
         userRepository.findOneByLogin(login).ifPresent(u -> {
             socialService.deleteUserSocialConnection(u.getLogin());
             userRepository.delete(u);
+            userSearchRepository.delete(u);
             log.debug("Deleted User: {}", u);
         });
     }
@@ -245,6 +254,7 @@ public class UserService {
         for (User user : users) {
             log.debug("Deleting not activated user {}", user.getLogin());
             userRepository.delete(user);
+            userSearchRepository.delete(user);
         }
     }
 }

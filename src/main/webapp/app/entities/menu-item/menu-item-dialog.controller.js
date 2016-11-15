@@ -5,13 +5,15 @@
         .module('foodininjaApp')
         .controller('MenuItemDialogController', MenuItemDialogController);
 
-    MenuItemDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'MenuItem', 'FoodJoint'];
+    MenuItemDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'DataUtils', 'entity', 'MenuItem', 'FoodJoint'];
 
-    function MenuItemDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, MenuItem, FoodJoint) {
+    function MenuItemDialogController ($timeout, $scope, $stateParams, $uibModalInstance, DataUtils, entity, MenuItem, FoodJoint) {
         var vm = this;
 
         vm.menuItem = entity;
         vm.clear = clear;
+        vm.byteSize = DataUtils.byteSize;
+        vm.openFile = DataUtils.openFile;
         vm.save = save;
         vm.foodjoints = FoodJoint.query();
 
@@ -42,6 +44,20 @@
             vm.isSaving = false;
         }
 
+
+        vm.setImage = function ($file, menuItem) {
+            if ($file && $file.$error === 'pattern') {
+                return;
+            }
+            if ($file) {
+                DataUtils.toBase64($file, function(base64Data) {
+                    $scope.$apply(function() {
+                        menuItem.image = base64Data;
+                        menuItem.imageContentType = $file.type;
+                    });
+                });
+            }
+        };
 
     }
 })();

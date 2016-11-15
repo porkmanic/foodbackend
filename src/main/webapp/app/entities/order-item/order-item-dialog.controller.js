@@ -5,14 +5,15 @@
         .module('foodininjaApp')
         .controller('OrderItemDialogController', OrderItemDialogController);
 
-    OrderItemDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'OrderItem', 'FoodOrder'];
+    OrderItemDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', 'entity', 'OrderItem', 'MenuItem', 'FoodOrder'];
 
-    function OrderItemDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, OrderItem, FoodOrder) {
+    function OrderItemDialogController ($timeout, $scope, $stateParams, $uibModalInstance, entity, OrderItem, MenuItem, FoodOrder) {
         var vm = this;
 
         vm.orderItem = entity;
         vm.clear = clear;
         vm.save = save;
+        vm.menuitems = MenuItem.query();
         vm.foodorders = FoodOrder.query();
 
         $timeout(function (){

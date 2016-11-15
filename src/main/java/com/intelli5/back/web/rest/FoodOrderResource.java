@@ -2,7 +2,9 @@ package com.intelli5.back.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.intelli5.back.domain.FoodOrder;
+import com.intelli5.back.domain.Ticket;
 import com.intelli5.back.service.FoodOrderService;
+import com.intelli5.back.service.dto.OrderDTO;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +21,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static org.elasticsearch.index.query.QueryBuilders.*;
+
 /**
  * REST controller for managing FoodOrder.
  */
@@ -27,7 +31,7 @@ import java.util.stream.StreamSupport;
 public class FoodOrderResource {
 
     private final Logger log = LoggerFactory.getLogger(FoodOrderResource.class);
-        
+
     @Inject
     private FoodOrderService foodOrderService;
 
@@ -49,6 +53,26 @@ public class FoodOrderResource {
         return ResponseEntity.created(new URI("/api/food-orders/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("foodOrder", result.getId().toString()))
             .body(result);
+    }
+
+    /**
+     * POST  /food-orders/new : Create a new foodOrder.
+     *
+     * @param orderDTO the orderDTO to create
+     * @return the ResponseEntity with status 201 (Created) and with body the new foodOrder, or with status 400 (Bad Request) if the foodOrder has already an ID
+     * @throws URISyntaxException if the Location URI syntax is incorrect
+     */
+    @PostMapping("/food-orders/new")
+    @Timed
+    public ResponseEntity<Ticket> createOrder(@RequestBody OrderDTO orderDTO) throws URISyntaxException {
+        log.debug("REST request to createOrder OrderDTO : {}", orderDTO);
+        if (orderDTO.getPaymentInfo().isEmpty() || orderDTO.getFoodJointId() <= 0 || orderDTO.getItems().isEmpty()) {
+            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("foodOrder", "wrong param", "wrong param")).body(null);
+        }
+        FoodOrder result = foodOrderService.createOrder(orderDTO);
+        return ResponseEntity.created(new URI("/api/food-orders/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert("foodOrder", result.getId().toString()))
+            .body(result.getTicket());
     }
 
     /**
@@ -121,5 +145,20 @@ public class FoodOrderResource {
         foodOrderService.delete(id);
         return ResponseEntity.ok().headers(HeaderUtil.createEntityDeletionAlert("foodOrder", id.toString())).build();
     }
+
+    /**
+     * SEARCH  /_search/food-orders?query=:query : search for the foodOrder corresponding
+     * to the query.
+     *
+     * @param query the query of the foodOrder search
+     * @return the result of the search
+     */
+    @GetMapping("/_search/food-orders")
+    @Timed
+    public List<FoodOrder> searchFoodOrders(@RequestParam String query) {
+        log.debug("REST request to search FoodOrders for query {}", query);
+        return foodOrderService.search(query);
+    }
+
 
 }

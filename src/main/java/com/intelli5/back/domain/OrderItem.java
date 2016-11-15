@@ -1,9 +1,9 @@
 package com.intelli5.back.domain;
 
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -11,6 +11,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "order_item")
+@Document(indexName = "orderitem")
 public class OrderItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -22,14 +23,8 @@ public class OrderItem implements Serializable {
     @Column(name = "quantity")
     private Integer quantity;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "price", precision=10, scale=2)
-    private BigDecimal price;
-
-    @Column(name = "image_url")
-    private String imageUrl;
+    @ManyToOne
+    private MenuItem menuItem;
 
     @ManyToOne
     private FoodOrder foodOrder;
@@ -55,43 +50,17 @@ public class OrderItem implements Serializable {
         this.quantity = quantity;
     }
 
-    public String getName() {
-        return name;
+    public MenuItem getMenuItem() {
+        return menuItem;
     }
 
-    public OrderItem name(String name) {
-        this.name = name;
+    public OrderItem menuItem(MenuItem menuItem) {
+        this.menuItem = menuItem;
         return this;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public OrderItem price(BigDecimal price) {
-        this.price = price;
-        return this;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public OrderItem imageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-        return this;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setMenuItem(MenuItem menuItem) {
+        this.menuItem = menuItem;
     }
 
     public FoodOrder getFoodOrder() {
@@ -132,9 +101,6 @@ public class OrderItem implements Serializable {
         return "OrderItem{" +
             "id=" + id +
             ", quantity='" + quantity + "'" +
-            ", name='" + name + "'" +
-            ", price='" + price + "'" +
-            ", imageUrl='" + imageUrl + "'" +
             '}';
     }
 }

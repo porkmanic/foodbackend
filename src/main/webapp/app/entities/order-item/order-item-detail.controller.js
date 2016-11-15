@@ -5,9 +5,9 @@
         .module('foodininjaApp')
         .controller('OrderItemDetailController', OrderItemDetailController);
 
-    OrderItemDetailController.$inject = ['$scope', '$rootScope', '$stateParams', 'previousState', 'entity', 'OrderItem', 'FoodOrder'];
+    OrderItemDetailController.$inject = ['$scope', '$rootScope', '$stateParams', 'previousState', 'entity', 'OrderItem', 'MenuItem', 'FoodOrder'];
 
-    function OrderItemDetailController($scope, $rootScope, $stateParams, previousState, entity, OrderItem, FoodOrder) {
+    function OrderItemDetailController($scope, $rootScope, $stateParams, previousState, entity, OrderItem, MenuItem, FoodOrder) {
         var vm = this;
 
         vm.orderItem = entity;

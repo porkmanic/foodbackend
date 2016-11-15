@@ -5,6 +5,7 @@ import com.intelli5.back.FoodininjaApp;
 import com.intelli5.back.domain.Ticket;
 import com.intelli5.back.repository.TicketRepository;
 import com.intelli5.back.service.TicketService;
+import com.intelli5.back.repository.search.TicketSearchRepository;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -40,6 +42,14 @@ import com.intelli5.back.domain.enumeration.TicketStatus;
 @SpringBootTest(classes = FoodininjaApp.class)
 public class TicketResourceIntTest {
 
+    private static final Integer DEFAULT_NUMBER = 1;
+    private static final Integer UPDATED_NUMBER = 2;
+
+    private static final byte[] DEFAULT_QR_CODE = TestUtil.createByteArray(1, "0");
+    private static final byte[] UPDATED_QR_CODE = TestUtil.createByteArray(2, "1");
+    private static final String DEFAULT_QR_CODE_CONTENT_TYPE = "image/jpg";
+    private static final String UPDATED_QR_CODE_CONTENT_TYPE = "image/png";
+
     private static final TicketStatus DEFAULT_STATUS = TicketStatus.WAIT;
     private static final TicketStatus UPDATED_STATUS = TicketStatus.PROCESS;
 
@@ -48,6 +58,9 @@ public class TicketResourceIntTest {
 
     @Inject
     private TicketService ticketService;
+
+    @Inject
+    private TicketSearchRepository ticketSearchRepository;
 
     @Inject
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -80,12 +93,16 @@ public class TicketResourceIntTest {
      */
     public static Ticket createEntity(EntityManager em) {
         Ticket ticket = new Ticket()
+                .number(DEFAULT_NUMBER)
+                .qrCode(DEFAULT_QR_CODE)
+                .qrCodeContentType(DEFAULT_QR_CODE_CONTENT_TYPE)
                 .status(DEFAULT_STATUS);
         return ticket;
     }
 
     @Before
     public void initTest() {
+        ticketSearchRepository.deleteAll();
         ticket = createEntity(em);
     }
 
@@ -105,7 +122,14 @@ public class TicketResourceIntTest {
         List<Ticket> tickets = ticketRepository.findAll();
         assertThat(tickets).hasSize(databaseSizeBeforeCreate + 1);
         Ticket testTicket = tickets.get(tickets.size() - 1);
+        assertThat(testTicket.getNumber()).isEqualTo(DEFAULT_NUMBER);
+        assertThat(testTicket.getQrCode()).isEqualTo(DEFAULT_QR_CODE);
+        assertThat(testTicket.getQrCodeContentType()).isEqualTo(DEFAULT_QR_CODE_CONTENT_TYPE);
         assertThat(testTicket.getStatus()).isEqualTo(DEFAULT_STATUS);
+
+        // Validate the Ticket in ElasticSearch
+        Ticket ticketEs = ticketSearchRepository.findOne(testTicket.getId());
+        assertThat(ticketEs).isEqualToComparingFieldByField(testTicket);
     }
 
     @Test
@@ -119,6 +143,9 @@ public class TicketResourceIntTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.[*].id").value(hasItem(ticket.getId().intValue())))
+                .andExpect(jsonPath("$.[*].number").value(hasItem(DEFAULT_NUMBER)))
+                .andExpect(jsonPath("$.[*].qrCodeContentType").value(hasItem(DEFAULT_QR_CODE_CONTENT_TYPE)))
+                .andExpect(jsonPath("$.[*].qrCode").value(hasItem(Base64Utils.encodeToString(DEFAULT_QR_CODE))))
                 .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())));
     }
 
@@ -133,6 +160,9 @@ public class TicketResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(ticket.getId().intValue()))
+            .andExpect(jsonPath("$.number").value(DEFAULT_NUMBER))
+            .andExpect(jsonPath("$.qrCodeContentType").value(DEFAULT_QR_CODE_CONTENT_TYPE))
+            .andExpect(jsonPath("$.qrCode").value(Base64Utils.encodeToString(DEFAULT_QR_CODE)))
             .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()));
     }
 
@@ -155,6 +185,9 @@ public class TicketResourceIntTest {
         // Update the ticket
         Ticket updatedTicket = ticketRepository.findOne(ticket.getId());
         updatedTicket
+                .number(UPDATED_NUMBER)
+                .qrCode(UPDATED_QR_CODE)
+                .qrCodeContentType(UPDATED_QR_CODE_CONTENT_TYPE)
                 .status(UPDATED_STATUS);
 
         restTicketMockMvc.perform(put("/api/tickets")
@@ -166,7 +199,14 @@ public class TicketResourceIntTest {
         List<Ticket> tickets = ticketRepository.findAll();
         assertThat(tickets).hasSize(databaseSizeBeforeUpdate);
         Ticket testTicket = tickets.get(tickets.size() - 1);
+        assertThat(testTicket.getNumber()).isEqualTo(UPDATED_NUMBER);
+        assertThat(testTicket.getQrCode()).isEqualTo(UPDATED_QR_CODE);
+        assertThat(testTicket.getQrCodeContentType()).isEqualTo(UPDATED_QR_CODE_CONTENT_TYPE);
         assertThat(testTicket.getStatus()).isEqualTo(UPDATED_STATUS);
+
+        // Validate the Ticket in ElasticSearch
+        Ticket ticketEs = ticketSearchRepository.findOne(testTicket.getId());
+        assertThat(ticketEs).isEqualToComparingFieldByField(testTicket);
     }
 
     @Test
@@ -182,8 +222,29 @@ public class TicketResourceIntTest {
                 .accept(TestUtil.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk());
 
+        // Validate ElasticSearch is empty
+        boolean ticketExistsInEs = ticketSearchRepository.exists(ticket.getId());
+        assertThat(ticketExistsInEs).isFalse();
+
         // Validate the database is empty
         List<Ticket> tickets = ticketRepository.findAll();
         assertThat(tickets).hasSize(databaseSizeBeforeDelete - 1);
+    }
+
+    @Test
+    @Transactional
+    public void searchTicket() throws Exception {
+        // Initialize the database
+        ticketService.save(ticket);
+
+        // Search the ticket
+        restTicketMockMvc.perform(get("/api/_search/tickets?query=id:" + ticket.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(ticket.getId().intValue())))
+            .andExpect(jsonPath("$.[*].number").value(hasItem(DEFAULT_NUMBER)))
+            .andExpect(jsonPath("$.[*].qrCodeContentType").value(hasItem(DEFAULT_QR_CODE_CONTENT_TYPE)))
+            .andExpect(jsonPath("$.[*].qrCode").value(hasItem(Base64Utils.encodeToString(DEFAULT_QR_CODE))))
+            .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())));
     }
 }

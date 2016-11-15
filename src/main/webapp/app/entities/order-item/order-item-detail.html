@@ -8,17 +8,9 @@
         <dd>
             <span>{{vm.orderItem.quantity}}</span>
         </dd>
-        <dt><span>Name</span></dt>
+        <dt><span>Menu Item</span></dt>
         <dd>
-            <span>{{vm.orderItem.name}}</span>
-        </dd>
-        <dt><span>Price</span></dt>
-        <dd>
-            <span>{{vm.orderItem.price}}</span>
-        </dd>
-        <dt><span>Image Url</span></dt>
-        <dd>
-            <span>{{vm.orderItem.imageUrl}}</span>
+            <a ui-sref="menu-item-detail({id:vm.orderItem.menuItem.id})">{{vm.orderItem.menuItem.id}}</a>
         </dd>
         <dt><span>Food Order</span></dt>
         <dd>

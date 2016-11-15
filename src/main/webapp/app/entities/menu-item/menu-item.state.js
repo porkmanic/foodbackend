@@ -97,7 +97,9 @@
                             return {
                                 name: null,
                                 price: null,
-                                imageUrl: null,
+                                image: null,
+                                imageContentType: null,
+                                description: null,
                                 id: null
                             };
                         }

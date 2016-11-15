@@ -8,17 +8,18 @@
         <dd>
             <span>{{vm.foodJoint.name}}</span>
         </dd>
-        <dt><span>Image Url</span></dt>
+        <dt><span>Working Hours</span></dt>
         <dd>
-            <span>{{vm.foodJoint.imageUrl}}</span>
+            <span>{{vm.foodJoint.workingHours}}</span>
         </dd>
-        <dt><span>Serving Number</span></dt>
+        <dt><span>Image</span></dt>
         <dd>
-            <span>{{vm.foodJoint.servingNumber}}</span>
-        </dd>
-        <dt><span>Last Issued Ticket Num</span></dt>
-        <dd>
-            <span>{{vm.foodJoint.lastIssuedTicketNum}}</span>
+            <div ng-if="vm.foodJoint.image">
+                <a ng-click="vm.openFile(vm.foodJoint.imageContentType, vm.foodJoint.image)">
+                    <img data-ng-src="{{'data:' + vm.foodJoint.imageContentType + ';base64,' + vm.foodJoint.image}}" style="max-width: 100%;"/>
+                </a>
+                {{vm.foodJoint.imageContentType}}, {{vm.byteSize(vm.foodJoint.image)}}
+            </div>
         </dd>
         <dt><span>Estimat Wait Per Person</span></dt>
         <dd>

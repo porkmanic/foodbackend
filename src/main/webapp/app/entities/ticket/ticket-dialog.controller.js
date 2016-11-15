@@ -5,13 +5,15 @@
         .module('foodininjaApp')
         .controller('TicketDialogController', TicketDialogController);
 
-    TicketDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', '$q', 'entity', 'Ticket', 'FoodOrder', 'User', 'FoodJoint'];
+    TicketDialogController.$inject = ['$timeout', '$scope', '$stateParams', '$uibModalInstance', '$q', 'DataUtils', 'entity', 'Ticket', 'FoodOrder', 'User', 'FoodJoint'];
 
-    function TicketDialogController ($timeout, $scope, $stateParams, $uibModalInstance, $q, entity, Ticket, FoodOrder, User, FoodJoint) {
+    function TicketDialogController ($timeout, $scope, $stateParams, $uibModalInstance, $q, DataUtils, entity, Ticket, FoodOrder, User, FoodJoint) {
         var vm = this;
 
         vm.ticket = entity;
         vm.clear = clear;
+        vm.byteSize = DataUtils.byteSize;
+        vm.openFile = DataUtils.openFile;
         vm.save = save;
         vm.foodorders = FoodOrder.query({filter: 'ticket-is-null'});
         $q.all([vm.ticket.$promise, vm.foodorders.$promise]).then(function() {
@@ -52,6 +54,20 @@
             vm.isSaving = false;
         }
 
+
+        vm.setQrCode = function ($file, ticket) {
+            if ($file && $file.$error === 'pattern') {
+                return;
+            }
+            if ($file) {
+                DataUtils.toBase64($file, function(base64Data) {
+                    $scope.$apply(function() {
+                        ticket.qrCode = base64Data;
+                        ticket.qrCodeContentType = $file.type;
+                    });
+                });
+            }
+        };
 
     }
 })();

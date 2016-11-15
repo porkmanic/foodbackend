@@ -11,5 +11,5 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public interface MenuItemRepository extends JpaRepository<MenuItem,Long> {
-
+    public List<MenuItem> findByFoodJoint_Id(Long id);
 }

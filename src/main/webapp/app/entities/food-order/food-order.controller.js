@@ -5,12 +5,14 @@
         .module('foodininjaApp')
         .controller('FoodOrderController', FoodOrderController);
 
-    FoodOrderController.$inject = ['$scope', '$state', 'FoodOrder'];
+    FoodOrderController.$inject = ['$scope', '$state', 'FoodOrder', 'FoodOrderSearch'];
 
-    function FoodOrderController ($scope, $state, FoodOrder) {
+    function FoodOrderController ($scope, $state, FoodOrder, FoodOrderSearch) {
         var vm = this;
         
         vm.foodOrders = [];
+        vm.search = search;
+        vm.loadAll = loadAll;
 
         loadAll();
 
@@ -19,5 +21,13 @@
                 vm.foodOrders = result;
             });
         }
-    }
+
+        function search () {
+            if (!vm.searchQuery) {
+                return vm.loadAll();
+            }
+            FoodOrderSearch.query({query: vm.searchQuery}, function(result) {
+                vm.foodOrders = result;
+            });
+        }    }
 })();

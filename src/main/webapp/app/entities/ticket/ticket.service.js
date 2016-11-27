@@ -4,9 +4,9 @@
         .module('foodininjaApp')
         .factory('Ticket', Ticket);
 
-    Ticket.$inject = ['$resource'];
+    Ticket.$inject = ['$resource', 'DateUtils'];
 
-    function Ticket ($resource) {
+    function Ticket ($resource, DateUtils) {
         var resourceUrl =  'api/tickets/:id';
 
         return $resource(resourceUrl, {}, {
@@ -16,6 +16,8 @@
                 transformResponse: function (data) {
                     if (data) {
                         data = angular.fromJson(data);
+                        data.createTime = DateUtils.convertDateTimeFromServer(data.createTime);
+                        data.estimateTime = DateUtils.convertDateTimeFromServer(data.estimateTime);
                     }
                     return data;
                 }

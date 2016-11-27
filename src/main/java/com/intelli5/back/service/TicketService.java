@@ -1,6 +1,7 @@
 package com.intelli5.back.service;
 
 import com.intelli5.back.domain.Ticket;
+import com.intelli5.back.domain.enumeration.TicketStatus;
 import com.intelli5.back.repository.TicketRepository;
 import com.intelli5.back.repository.search.TicketSearchRepository;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,7 +25,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class TicketService {
 
     private final Logger log = LoggerFactory.getLogger(TicketService.class);
-    
+
     @Inject
     private TicketRepository ticketRepository;
 
@@ -45,10 +47,10 @@ public class TicketService {
 
     /**
      *  Get all the tickets.
-     *  
+     *
      *  @return the list of entities
      */
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true)
     public List<Ticket> findAll() {
         log.debug("Request to get all Tickets");
         List<Ticket> result = ticketRepository.findAll();
@@ -62,11 +64,47 @@ public class TicketService {
      *  @param id the id of the entity
      *  @return the entity
      */
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true)
     public Ticket findOne(Long id) {
         log.debug("Request to get Ticket : {}", id);
         Ticket ticket = ticketRepository.findOne(id);
         return ticket;
+    }
+
+    /**
+     *  Get one ticket by id.
+     *
+     *  @param id the id of the entity
+     *  @return the entity
+     */
+    @Transactional(readOnly = true)
+    public List<Ticket> findByFoodJoint_Id(Long id) {
+        log.debug("Request to findByFoodJoint_Id : {}", id);
+        List<Ticket> tickets= ticketRepository.findByFoodJoint_IdAndStatus(id, TicketStatus.WAIT);
+        return tickets;
+    }
+
+    /**
+     *  Get one ticket by id.
+     *
+     *  @param id the id of the entity
+     *  @return the entity
+     */
+    @Transactional(readOnly = true)
+    public int getQueueNumber(Long id) {
+        log.debug("Request to get getQueueNumber : {}", id);
+        return findByFoodJoint_Id(id).size();
+    }
+
+    /**
+     *  Get one ticket by id.
+     *
+     *  @return the entity
+     */
+    @Transactional(readOnly = true)
+    public Ticket getNextTicket(Long foodJointId, Collection<TicketStatus> statuses) {
+        log.debug("Request to get getNextTicket");
+        return ticketRepository.findTopByFoodJoint_IdAndStatusIn(foodJointId, statuses);
     }
 
     /**

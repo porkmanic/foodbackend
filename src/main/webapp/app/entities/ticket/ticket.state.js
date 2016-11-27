@@ -99,6 +99,8 @@
                                 qrCode: null,
                                 qrCodeContentType: null,
                                 status: null,
+                                createTime: null,
+                                estimateTime: null,
                                 id: null
                             };
                         }

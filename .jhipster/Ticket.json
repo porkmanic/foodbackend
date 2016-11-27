@@ -35,13 +35,20 @@
         {
             "fieldName": "status",
             "fieldType": "TicketStatus",
-            "fieldValues": "WAIT,PROCESS,SKIP,FINISH"
+            "fieldValues": "WAIT,NO_ORDER_WAIT,PROCESS,READY,SKIP,FINISH,CANCEL"
+        },
+        {
+            "fieldName": "createTime",
+            "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "estimateTime",
+            "fieldType": "ZonedDateTime"
         }
     ],
     "changelogDate": "20161113165919",
-    "entityTableName": "ticket",
     "dto": "no",
-    "pagination": "no",
     "service": "serviceClass",
-    "searchEngine": "elasticsearch"
+    "entityTableName": "ticket",
+    "pagination": "no"
 }

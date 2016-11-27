@@ -4,5 +4,5 @@ package com.intelli5.back.domain.enumeration;
  * The TicketStatus enumeration.
  */
 public enum TicketStatus {
-    WAIT,PROCESS,SKIP,FINISH
+    WAIT,NO_ORDER_WAIT,PROCESS,READY,SKIP,FINISH,CANCEL
 }

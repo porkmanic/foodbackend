@@ -2,7 +2,9 @@ package com.intelli5.back.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.intelli5.back.domain.Ticket;
+import com.intelli5.back.domain.enumeration.TicketStatus;
 import com.intelli5.back.service.TicketService;
+import com.intelli5.back.service.dto.TicketDTO;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,7 +33,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class TicketResource {
 
     private final Logger log = LoggerFactory.getLogger(TicketResource.class);
-        
+
     @Inject
     private TicketService ticketService;
 
@@ -47,6 +51,8 @@ public class TicketResource {
         if (ticket.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("ticket", "idexists", "A new ticket cannot already have an ID")).body(null);
         }
+        // force no order wait
+        ticket.setStatus(TicketStatus.NO_ORDER_WAIT);
         Ticket result = ticketService.save(ticket);
         return ResponseEntity.created(new URI("/api/tickets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("ticket", result.getId().toString()))
@@ -88,6 +94,18 @@ public class TicketResource {
     }
 
     /**
+     * GET  /tickets/foodjoint/:id : get all the tickets by food joint.
+     *
+     * @return the ResponseEntity with status 200 (OK) and the list of tickets in body
+     */
+    @GetMapping("/tickets/foodjoint/{id}")
+    @Timed
+    public List<Ticket> findByFoodJoint_Id(@PathVariable Long id) {
+        log.debug("REST request to get findByFoodJoint_Id");
+        return ticketService.findByFoodJoint_Id(id);
+    }
+
+    /**
      * GET  /tickets/:id : get the "id" ticket.
      *
      * @param id the id of the ticket to retrieve
@@ -102,6 +120,68 @@ public class TicketResource {
             .map(result -> new ResponseEntity<>(
                 result,
                 HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * GET  /tickets/next : get the next ticket.
+     *
+     * @param ticketDTO foodJointId, previousTicketId, previousTicketStatus(FINISH or SKIP)
+     * @return the ResponseEntity with status 200 (OK) and with body the ticket, or with status 404 (Not Found)
+     */
+    @PostMapping("/tickets/next")
+    @Timed
+    public ResponseEntity<Ticket> getNextTicketSetPreviousTicketStatus(@RequestBody TicketDTO ticketDTO) {
+        log.debug("REST request to getNextTicketSetPreviousTicketStatus Ticket : {}", ticketDTO);
+        Long preTickId = ticketDTO.getPreviousTicketId();
+        if(preTickId != null && preTickId > 0){
+            Ticket previousTicket = ticketService.findOne(preTickId);
+            previousTicket.setStatus(ticketDTO.getPreviousTicketStatus());
+            ticketService.save(previousTicket);
+        }
+        List<TicketStatus> candidateStatues = new ArrayList<>();
+        candidateStatues.add(TicketStatus.NO_ORDER_WAIT);
+        candidateStatues.add(TicketStatus.READY);
+        Ticket ticket = ticketService.getNextTicket(ticketDTO.getFoodJointId(),candidateStatues);
+        return Optional.ofNullable(ticket)
+            .map(result ->{
+                result.setStatus(TicketStatus.PROCESS);
+                ticketService.save(result);
+                return new ResponseEntity<>(
+                    result,
+                    HttpStatus.OK);
+            })
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * GET  /tickets/next_has_order : get the next ticket.
+     *
+     * @param ticketDTO foodJointId, previousTicketId, previousTicketStatus(READY or SKIP)
+     * @return the ResponseEntity with status 200 (OK) and with body the ticket, or with status 404 (Not Found)
+     */
+    @PostMapping("/tickets/next_has_order")
+    @Timed
+    public ResponseEntity<Ticket> getNextHasOrderTicketSetPreviousTicketStatus(@RequestBody TicketDTO ticketDTO) {
+        log.debug("REST request to getNextOrderTicketSetPreviousTicketStatus Ticket : {}", ticketDTO);
+        Long preTickId = ticketDTO.getPreviousTicketId();
+        if(preTickId != null && preTickId > 0){
+            Ticket previousTicket = ticketService.findOne(preTickId);
+            previousTicket.setStatus(ticketDTO.getPreviousTicketStatus());
+            ticketService.save(previousTicket);
+        }
+        List<TicketStatus> candidateStatues = new ArrayList<>();
+        candidateStatues.add(TicketStatus.WAIT);
+        Ticket ticket = ticketService.getNextTicket(ticketDTO.getFoodJointId(), candidateStatues);
+        return Optional.ofNullable(ticket)
+            .map(result ->
+            {
+                result.setStatus(TicketStatus.PROCESS);
+                ticketService.save(result);
+                return new ResponseEntity<>(
+                result,
+                HttpStatus.OK);
+            })
             .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -123,7 +203,7 @@ public class TicketResource {
      * SEARCH  /_search/tickets?query=:query : search for the ticket corresponding
      * to the query.
      *
-     * @param query the query of the ticket search 
+     * @param query the query of the ticket search
      * @return the result of the search
      */
     @GetMapping("/_search/tickets")

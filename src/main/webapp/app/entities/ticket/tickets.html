@@ -39,6 +39,8 @@
                     <th><span>Number</span></th>
                     <th><span>Qr Code</span></th>
                     <th><span>Status</span></th>
+                    <th><span>Create Time</span></th>
+                    <th><span>Estimate Time</span></th>
                     <th><span>Food Order</span></th>
                     <th><span>User</span></th>
                     <th><span>Food Joint</span></th>
@@ -56,6 +58,8 @@
                         <span ng-if="ticket.qrCode">{{ticket.qrCodeContentType}}, {{vm.byteSize(ticket.qrCode)}}</span>
                     </td>
                     <td>{{ticket.status}}</td>
+                    <td>{{ticket.createTime | date:'medium'}}</td>
+                    <td>{{ticket.estimateTime | date:'medium'}}</td>
                     <td>
                         <a ui-sref="food-order-detail({id:ticket.foodOrder.id})">{{ticket.foodOrder.id}}</a>
                     </td>

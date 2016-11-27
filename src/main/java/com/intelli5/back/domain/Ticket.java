@@ -4,6 +4,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 import com.intelli5.back.domain.enumeration.TicketStatus;
@@ -35,6 +36,12 @@ public class Ticket implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TicketStatus status;
+
+    @Column(name = "create_time")
+    private ZonedDateTime createTime;
+
+    @Column(name = "estimate_time")
+    private ZonedDateTime estimateTime;
 
     @OneToOne
     @JoinColumn(unique = true)
@@ -106,6 +113,32 @@ public class Ticket implements Serializable {
         this.status = status;
     }
 
+    public ZonedDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public Ticket createTime(ZonedDateTime createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
+    public void setCreateTime(ZonedDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public ZonedDateTime getEstimateTime() {
+        return estimateTime;
+    }
+
+    public Ticket estimateTime(ZonedDateTime estimateTime) {
+        this.estimateTime = estimateTime;
+        return this;
+    }
+
+    public void setEstimateTime(ZonedDateTime estimateTime) {
+        this.estimateTime = estimateTime;
+    }
+
     public FoodOrder getFoodOrder() {
         return foodOrder;
     }
@@ -173,6 +206,8 @@ public class Ticket implements Serializable {
             ", qrCode='" + qrCode + "'" +
             ", qrCodeContentType='" + qrCodeContentType + "'" +
             ", status='" + status + "'" +
+            ", createTime='" + createTime + "'" +
+            ", estimateTime='" + estimateTime + "'" +
             '}';
     }
 }

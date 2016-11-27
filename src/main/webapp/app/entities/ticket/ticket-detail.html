@@ -21,6 +21,14 @@
         <dd>
             <span>{{vm.ticket.status}}</span>
         </dd>
+        <dt><span>Create Time</span></dt>
+        <dd>
+            <span>{{vm.ticket.createTime | date:'medium'}}</span>
+        </dd>
+        <dt><span>Estimate Time</span></dt>
+        <dd>
+            <span>{{vm.ticket.estimateTime | date:'medium'}}</span>
+        </dd>
         <dt><span>Food Order</span></dt>
         <dd>
             <a ui-sref="food-order-detail({id:vm.ticket.foodOrder.id})">{{vm.ticket.foodOrder.id}}</a>

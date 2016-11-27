@@ -584,7 +584,7 @@
                     <url>jdbc:mysql://localhost:3306/foodininja</url>
                     <defaultSchemaName>foodininja</defaultSchemaName>
                     <username>root</username>
-                    <password></password>
+                    <password>1234</password>
                     <referenceUrl>hibernate:spring:com.intelli5.back.domain?dialect=org.hibernate.dialect.MySQL5InnoDBDialect&amp;hibernate.ejb.naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringNamingStrategy</referenceUrl>
                     <verbose>true</verbose>
                     <logging>debug</logging>

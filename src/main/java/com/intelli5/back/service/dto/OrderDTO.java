@@ -9,6 +9,7 @@ public class OrderDTO {
     private String paymentInfo;
     private Long foodJointId;
     private List<ItemDTO> items;
+    private Long userId;
 
     public String getPaymentInfo() {
         return paymentInfo;
@@ -32,5 +33,13 @@ public class OrderDTO {
 
     public void setItems(List<ItemDTO> items) {
         this.items = items;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

@@ -5,15 +5,15 @@ import com.intelli5.back.repository.OrderItemRepository;
 import com.intelli5.back.repository.search.OrderItemSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * Service Implementation for managing OrderItem.
@@ -23,7 +23,7 @@ import static org.elasticsearch.index.query.QueryBuilders.*;
 public class OrderItemService {
 
     private final Logger log = LoggerFactory.getLogger(OrderItemService.class);
-    
+
     @Inject
     private OrderItemRepository orderItemRepository;
 
@@ -45,14 +45,25 @@ public class OrderItemService {
 
     /**
      *  Get all the orderItems.
-     *  
+     *
      *  @return the list of entities
      */
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true)
     public List<OrderItem> findAll() {
         log.debug("Request to get all OrderItems");
         List<OrderItem> result = orderItemRepository.findAll();
+        return result;
+    }
 
+    /**
+     * Get all the orderItems.
+     *
+     * @return the list of entities
+     */
+    @Transactional(readOnly = true)
+    public List<OrderItem> findByFoodOrder_Id(Long foodOrderId) {
+        log.debug("Request to get all OrderItems");
+        List<OrderItem> result = orderItemRepository.findByFoodOrder_Id(foodOrderId);
         return result;
     }
 
@@ -62,7 +73,7 @@ public class OrderItemService {
      *  @param id the id of the entity
      *  @return the entity
      */
-    @Transactional(readOnly = true) 
+    @Transactional(readOnly = true)
     public OrderItem findOne(Long id) {
         log.debug("Request to get OrderItem : {}", id);
         OrderItem orderItem = orderItemRepository.findOne(id);

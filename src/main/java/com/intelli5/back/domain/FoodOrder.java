@@ -7,8 +7,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A FoodOrder.
@@ -32,7 +32,6 @@ public class FoodOrder implements Serializable {
     private Payment payment;
 
     @OneToMany(mappedBy = "foodOrder",cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<OrderItem> orderItems = new HashSet<>();
 
     @OneToOne(mappedBy = "foodOrder",cascade = CascadeType.ALL)
@@ -51,17 +50,21 @@ public class FoodOrder implements Serializable {
         return totalPrice;
     }
 
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
     public FoodOrder totalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
         return this;
     }
 
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
     public Payment getPayment() {
         return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 
     public FoodOrder payment(Payment payment) {
@@ -69,12 +72,12 @@ public class FoodOrder implements Serializable {
         return this;
     }
 
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
-
     public Set<OrderItem> getOrderItems() {
         return orderItems;
+    }
+
+    public void setOrderItems(Set<OrderItem> orderItems) {
+        this.orderItems = orderItems;
     }
 
     public FoodOrder orderItems(Set<OrderItem> orderItems) {
@@ -94,21 +97,17 @@ public class FoodOrder implements Serializable {
         return this;
     }
 
-    public void setOrderItems(Set<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-    }
-
     public Ticket getTicket() {
         return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
     }
 
     public FoodOrder ticket(Ticket ticket) {
         this.ticket = ticket;
         return this;
-    }
-
-    public void setTicket(Ticket ticket) {
-        this.ticket = ticket;
     }
 
     @Override

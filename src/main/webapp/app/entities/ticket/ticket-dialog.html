@@ -45,9 +45,12 @@
             <label class="control-label" for="field_status">Status</label>
             <select class="form-control" name="status" ng-model="vm.ticket.status" id="field_status">
                 <option value="WAIT">WAIT</option>
+                <option value="NO_ORDER_WAIT">NO_ORDER_WAIT</option>
                 <option value="PROCESS">PROCESS</option>
+                <option value="READY">READY</option>
                 <option value="SKIP">SKIP</option>
                 <option value="FINISH">FINISH</option>
+                <option value="CANCEL">CANCEL</option>
             </select>
         </div>
         <div class="form-group">

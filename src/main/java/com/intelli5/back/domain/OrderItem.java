@@ -1,5 +1,6 @@
 package com.intelli5.back.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
@@ -27,6 +28,7 @@ public class OrderItem implements Serializable {
     private MenuItem menuItem;
 
     @ManyToOne
+    @JsonIgnore
     private FoodOrder foodOrder;
 
     public Long getId() {
@@ -41,17 +43,21 @@ public class OrderItem implements Serializable {
         return quantity;
     }
 
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
     public OrderItem quantity(Integer quantity) {
         this.quantity = quantity;
         return this;
     }
 
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
     public MenuItem getMenuItem() {
         return menuItem;
+    }
+
+    public void setMenuItem(MenuItem menuItem) {
+        this.menuItem = menuItem;
     }
 
     public OrderItem menuItem(MenuItem menuItem) {
@@ -59,21 +65,17 @@ public class OrderItem implements Serializable {
         return this;
     }
 
-    public void setMenuItem(MenuItem menuItem) {
-        this.menuItem = menuItem;
-    }
-
     public FoodOrder getFoodOrder() {
         return foodOrder;
+    }
+
+    public void setFoodOrder(FoodOrder foodOrder) {
+        this.foodOrder = foodOrder;
     }
 
     public OrderItem foodOrder(FoodOrder foodOrder) {
         this.foodOrder = foodOrder;
         return this;
-    }
-
-    public void setFoodOrder(FoodOrder foodOrder) {
-        this.foodOrder = foodOrder;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.intelli5.back.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import javax.persistence.*;
@@ -38,6 +39,7 @@ public class MenuItem implements Serializable {
     private String description;
 
     @ManyToOne
+    @JsonIgnore
     private FoodJoint foodJoint;
 
     public Long getId() {
@@ -52,17 +54,21 @@ public class MenuItem implements Serializable {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public MenuItem name(String name) {
         this.name = name;
         return this;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public BigDecimal getPrice() {
         return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public MenuItem price(BigDecimal price) {
@@ -70,12 +76,12 @@ public class MenuItem implements Serializable {
         return this;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
     public byte[] getImage() {
         return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     public MenuItem image(byte[] image) {
@@ -83,12 +89,12 @@ public class MenuItem implements Serializable {
         return this;
     }
 
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
-
     public String getImageContentType() {
         return imageContentType;
+    }
+
+    public void setImageContentType(String imageContentType) {
+        this.imageContentType = imageContentType;
     }
 
     public MenuItem imageContentType(String imageContentType) {
@@ -96,12 +102,12 @@ public class MenuItem implements Serializable {
         return this;
     }
 
-    public void setImageContentType(String imageContentType) {
-        this.imageContentType = imageContentType;
-    }
-
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public MenuItem description(String description) {
@@ -109,21 +115,17 @@ public class MenuItem implements Serializable {
         return this;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public FoodJoint getFoodJoint() {
         return foodJoint;
+    }
+
+    public void setFoodJoint(FoodJoint foodJoint) {
+        this.foodJoint = foodJoint;
     }
 
     public MenuItem foodJoint(FoodJoint foodJoint) {
         this.foodJoint = foodJoint;
         return this;
-    }
-
-    public void setFoodJoint(FoodJoint foodJoint) {
-        this.foodJoint = foodJoint;
     }
 
     @Override

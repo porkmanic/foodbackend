@@ -1,14 +1,16 @@
 package com.intelli5.back.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.intelli5.back.domain.FoodOrder;
+import com.intelli5.back.domain.OrderItem;
 import com.intelli5.back.domain.Ticket;
 import com.intelli5.back.domain.enumeration.TicketStatus;
+import com.intelli5.back.service.OrderItemService;
 import com.intelli5.back.service.TicketService;
 import com.intelli5.back.service.dto.TicketDTO;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.inject.Inject;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import java.util.*;
 
 /**
  * REST controller for managing Ticket.
@@ -36,6 +31,9 @@ public class TicketResource {
 
     @Inject
     private TicketService ticketService;
+
+    @Inject
+    private OrderItemService orderItemService;
 
     /**
      * POST  /tickets : Create a new ticket.
@@ -178,6 +176,9 @@ public class TicketResource {
             {
                 result.setStatus(TicketStatus.PROCESS);
                 ticketService.save(result);
+                FoodOrder foodOrder = result.getFoodOrder();
+                Set<OrderItem> orderItems = new HashSet<OrderItem>(orderItemService.findByFoodOrder_Id(foodOrder.getId()));
+                foodOrder.setOrderItems(orderItems);
                 return new ResponseEntity<>(
                 result,
                 HttpStatus.OK);

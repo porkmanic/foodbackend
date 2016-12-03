@@ -9,14 +9,15 @@ import java.util.Map;
 public class TicketCounterService {
     private static Map<String,Integer> map = new HashMap<>();
 
-    public static Integer increase(String key) {
-        Integer currentVal = 1;
+    public static Integer getNextTicketNumber(String key) {
+        Integer nextNum = 1;
         if(map.containsKey(key)) {
-            currentVal = map.get(key);
-            map.replace(key, currentVal, currentVal + 1);
+            nextNum = map.get(key);
+            map.replace(key, nextNum, nextNum + 1);
+            nextNum++;
         } else {
-            map.put(key, currentVal);
+            map.put(key, nextNum);
         }
-        return currentVal;
+        return nextNum;
     }
 }

@@ -6,8 +6,8 @@ import com.intelli5.back.repository.search.MenuItemSearchRepository;
 import com.intelli5.back.service.dto.ItemDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * Service Implementation for managing MenuItem.
@@ -83,9 +83,13 @@ public class MenuItemService {
         BigDecimal price = BigDecimal.ZERO;
         for (ItemDTO itemDTO: itemDTOs) {
             MenuItem menuItem = menuItemRepository.findOne(itemDTO.getId());
-            price = price.add(menuItem.getPrice().multiply(new BigDecimal(itemDTO.getQuantity())));
+            price = calculatePrice(price, menuItem.getPrice().multiply(new BigDecimal(itemDTO.getQuantity())));
         }
         return price;
+    }
+
+    private BigDecimal calculatePrice(BigDecimal price, BigDecimal newPrice) {
+        return price.add(newPrice);
     }
 
     /**

@@ -3,25 +3,20 @@ package com.intelli5.back.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import com.intelli5.back.domain.MenuItem;
 import com.intelli5.back.service.MenuItemService;
+import com.intelli5.back.service.OrderValidation;
 import com.intelli5.back.service.dto.ItemDTO;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing MenuItem.
@@ -64,9 +59,17 @@ public class MenuItemResource {
      */
     @PostMapping("/menu-items/price")
     @Timed
-    public BigDecimal getPrice(@RequestBody List<ItemDTO> itemDTOs) throws URISyntaxException {
+    public String getPrice(@RequestBody List<ItemDTO> itemDTOs) throws URISyntaxException {
         log.debug("REST request to get price : {}", itemDTOs);
-        return menuItemService.getPrice(itemDTOs);
+        if (itemDTOs == null || itemDTOs.size() == 0) {
+            return "0";
+        }
+        String foodJointName = menuItemService.findOne(itemDTOs.get(0).getId()).getFoodJoint().getName();
+        log.debug("food Joint name: {}", foodJointName);
+        if (OrderValidation.validate(foodJointName)) {
+            return "-1";
+        }
+        return menuItemService.getPrice(itemDTOs).toString();
     }
 
     /**

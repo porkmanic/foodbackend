@@ -1,21 +1,29 @@
 package com.intelli5.back.service;
 
+import com.intelli5.back.domain.FoodJoint;
 import com.intelli5.back.domain.Ticket;
+import com.intelli5.back.domain.User;
 import com.intelli5.back.domain.enumeration.TicketStatus;
 import com.intelli5.back.repository.TicketRepository;
+import com.intelli5.back.repository.UserRepository;
 import com.intelli5.back.repository.search.TicketSearchRepository;
+import net.glxn.qrgen.javase.QRCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * Service Implementation for managing Ticket.
@@ -31,6 +39,9 @@ public class TicketService {
 
     @Inject
     private TicketSearchRepository ticketSearchRepository;
+
+    @Inject
+    private UserRepository userRepository;
 
     /**
      * Save a ticket.
@@ -80,7 +91,36 @@ public class TicketService {
     @Transactional(readOnly = true)
     public List<Ticket> findByFoodJoint_Id(Long id) {
         log.debug("Request to findByFoodJoint_Id : {}", id);
-        List<Ticket> tickets= ticketRepository.findByFoodJoint_IdAndStatus(id, TicketStatus.WAIT);
+        List<TicketStatus> candidateStatues = new ArrayList<>();
+        candidateStatues.add(TicketStatus.NO_ORDER_WAIT);
+        candidateStatues.add(TicketStatus.READY);
+        List<Ticket> tickets = ticketRepository.findByFoodJoint_IdAndStatusIn(id, candidateStatues);
+        return tickets;
+    }
+
+    /**
+     * Get one ticket by id.
+     *
+     * @param id the id of the entity
+     * @return the entity
+     */
+    @Transactional(readOnly = true)
+    public List<Ticket> findByUser_Id(Long id) {
+        log.debug("Request to findByUser_Id : {}", id);
+        List<Ticket> tickets = ticketRepository.findByUser_Id(id);
+        return tickets;
+    }
+
+    /**
+     * Get one ticket by id.
+     *
+     * @param name the id of the entity
+     * @return the entity
+     */
+    @Transactional(readOnly = true)
+    public List<Ticket> findByUser_Login(String name) {
+        log.debug("Request to findByUser_Login : {}", name);
+        List<Ticket> tickets = ticketRepository.findByUser_Login(name);
         return tickets;
     }
 
@@ -130,5 +170,30 @@ public class TicketService {
         return StreamSupport
             .stream(ticketSearchRepository.search(queryStringQuery(query)).spliterator(), false)
             .collect(Collectors.toList());
+    }
+
+    public Ticket getNewTicket(FoodJoint foodJoint, String userName) {
+        Ticket ticket = new Ticket();
+        ZonedDateTime zonedDateTime = getEstimateWaitingTime(foodJoint);
+        ticket.setEstimateTime(zonedDateTime);
+        ticket.setNumber(TicketCounterService.getNextTicketNumber(foodJoint.getName()));
+        byte[] stream = QRCode.from(foodJoint.getName() + "-" + ticket.getNumber()).stream().toByteArray();
+        ticket.setFoodJoint(foodJoint);
+        ticket.setQrCode(stream);
+        ticket.setQrCodeContentType("image/png");
+        ticket.setCreateTime(ZonedDateTime.from(new Date().toInstant().atZone(ZoneId.systemDefault())));
+        if (userName != null && !userName.isEmpty()) {
+            User user = userRepository.findOneByLogin(userName).get();
+            ticket.setUser(user);
+        }
+        return ticket;
+    }
+
+    public ZonedDateTime getEstimateWaitingTime(FoodJoint foodJoint) {
+        int waitingNum = getQueueNumber(foodJoint.getId());
+        long now = new Date().getTime();
+        long waitTime = now + (long) (foodJoint.getEstimatWaitPerPerson() * 1000 * waitingNum);
+        Date d = new Date(waitTime);
+        return d.toInstant().atZone(ZoneId.systemDefault());
     }
 }

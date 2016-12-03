@@ -9,7 +9,6 @@ import com.intelli5.back.repository.MenuItemRepository;
 import com.intelli5.back.repository.search.FoodOrderSearchRepository;
 import com.intelli5.back.service.dto.ItemDTO;
 import com.intelli5.back.service.dto.OrderDTO;
-import net.glxn.qrgen.javase.QRCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +48,9 @@ public class FoodOrderService {
     @Inject
     private TicketService ticketService;
 
+    @Inject
+    private PaymentService paymentService;
+
     /**
      * Save a foodOrder.
      *
@@ -73,6 +72,9 @@ public class FoodOrderService {
      */
     public FoodOrder createOrder(OrderDTO orderDTO) {
         log.debug("Request to create FoodOrder : {}", orderDTO);
+        if (!paymentService.confirmPayment(orderDTO.getPaymentInfo())) {
+            return null;
+        }
         FoodOrder foodOrder = new FoodOrder();
         BigDecimal price = BigDecimal.ZERO;
         Set<OrderItem> orderItems = new HashSet<OrderItem>();
@@ -90,29 +92,13 @@ public class FoodOrderService {
         payment.setPaymentInfo(orderDTO.getPaymentInfo());
         payment.setStatus(PayStatus.PROCESS);
 
-        FoodJoint foodJoint = foodJointRepository.findOne(orderDTO.getFoodJointId());
-
-        int waitingNum = ticketService.getQueueNumber(orderDTO.getFoodJointId());
-        long now = new Date().getTime();
-        long waitTime = now + (long)(foodJoint.getEstimatWaitPerPerson() * 1000 * waitingNum);
-        Date d = new Date(waitTime);
-        ZonedDateTime zonedDateTime = d.toInstant().atZone(ZoneId.systemDefault());
-        Ticket ticket = new Ticket();
-        // TODO: number
-        ticket.setNumber(TicketCounterService.increase(foodJoint.getName()));
-        byte[] stream = QRCode.from(foodJoint.getName() + "-" + ticket.getNumber()).stream().toByteArray();
-        ticket.setFoodJoint(foodJoint);
-        ticket.setStatus(TicketStatus.WAIT);
+        Ticket ticket = ticketService.getNewTicket(foodJointRepository.findOne(orderDTO.getFoodJointId()), orderDTO.getUserName());
         ticket.setFoodOrder(foodOrder);
-        ticket.setQrCode(stream);
-        ticket.setQrCodeContentType("image/png");
-        ticket.setCreateTime(ZonedDateTime.from(new Date().toInstant().atZone(ZoneId.systemDefault())));
-        ticket.setEstimateTime(zonedDateTime);
-        if (orderDTO.getUserId() != null) {
-            User user = new User();
-            user.setId(orderDTO.getUserId());
-            ticket.setUser(user);
-        }
+        ticket.setStatus(TicketStatus.WAIT);
+//        if (orderDTO.getUserName() != null && !orderDTO.getUserName().isEmpty()) {
+//            User user = userRepository.findOneByLogin(orderDTO.getUserName()).get();
+//            ticket.setUser(user);
+//        }
 
         foodOrder.setTotalPrice(price);
         foodOrder.setPayment(payment);

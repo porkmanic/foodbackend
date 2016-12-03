@@ -1,10 +1,12 @@
 package com.intelli5.back.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
+import com.intelli5.back.domain.FoodJoint;
 import com.intelli5.back.domain.FoodOrder;
 import com.intelli5.back.domain.OrderItem;
 import com.intelli5.back.domain.Ticket;
 import com.intelli5.back.domain.enumeration.TicketStatus;
+import com.intelli5.back.service.FoodJointService;
 import com.intelli5.back.service.OrderItemService;
 import com.intelli5.back.service.TicketService;
 import com.intelli5.back.service.dto.TicketDTO;
@@ -35,6 +37,9 @@ public class TicketResource {
     @Inject
     private OrderItemService orderItemService;
 
+    @Inject
+    private FoodJointService foodJointService;
+
     /**
      * POST  /tickets : Create a new ticket.
      *
@@ -49,8 +54,6 @@ public class TicketResource {
         if (ticket.getId() != null) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("ticket", "idexists", "A new ticket cannot already have an ID")).body(null);
         }
-        // force no order wait
-        ticket.setStatus(TicketStatus.NO_ORDER_WAIT);
         Ticket result = ticketService.save(ticket);
         return ResponseEntity.created(new URI("/api/tickets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("ticket", result.getId().toString()))
@@ -104,6 +107,42 @@ public class TicketResource {
     }
 
     /**
+     * GET  /tickets/user/:id : get all the tickets by food joint.
+     *
+     * @return the ResponseEntity with status 200 (OK) and the list of tickets in body
+     */
+    @GetMapping("/tickets/user/{id}")
+    @Timed
+    public List<Ticket> findByUser_Id(@PathVariable Long id) {
+        log.debug("REST request to get findByUser_Id");
+        List<Ticket> tickets = ticketService.findByUser_Id(id);
+        for (Ticket ticket : tickets) {
+            if (ticket.getStatus() == TicketStatus.FINISH) {
+                tickets.remove(ticket);
+            }
+        }
+        return tickets;
+    }
+
+    /**
+     * GET  /tickets/username/:name : get all the tickets by food joint.
+     *
+     * @return the ResponseEntity with status 200 (OK) and the list of tickets in body
+     */
+    @GetMapping("/tickets/username/{name}")
+    @Timed
+    public List<Ticket> findByUser_Name(@PathVariable String name) {
+        log.debug("REST request to get findByUser_Id");
+        List<Ticket> tickets = ticketService.findByUser_Login(name);
+        for (Ticket ticket : tickets) {
+            if (ticket.getStatus() == TicketStatus.FINISH) {
+                tickets.remove(ticket);
+            }
+        }
+        return tickets;
+    }
+
+    /**
      * GET  /tickets/:id : get the "id" ticket.
      *
      * @param id the id of the ticket to retrieve
@@ -122,6 +161,25 @@ public class TicketResource {
     }
 
     /**
+     * GET  /tickets/new : get new ticket.
+     *
+     * @param foodJointId the id of the ticket to retrieve
+     * @return the ResponseEntity with status 200 (OK) and with body the ticket, or with status 404 (Not Found)
+     */
+    @GetMapping("/tickets/new")
+    @Timed
+    public ResponseEntity<Ticket> getNewTicket(@RequestParam Long foodJointId, @RequestParam String userName) throws URISyntaxException {
+        log.debug("REST request to get new Ticket : {}", foodJointId);
+        FoodJoint foodJoint = foodJointService.findOne(foodJointId);
+        Ticket ticket = ticketService.getNewTicket(foodJoint, userName);
+        ticket.setStatus(TicketStatus.NO_ORDER_WAIT);
+        ticket = ticketService.save(ticket);
+        return ResponseEntity.created(new URI("/api/tickets/" + ticket.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert("ticket", ticket.getId().toString()))
+            .body(ticket);
+    }
+
+    /**
      * GET  /tickets/next : get the next ticket.
      *
      * @param ticketDTO foodJointId, previousTicketId, previousTicketStatus(FINISH or SKIP)
@@ -129,31 +187,19 @@ public class TicketResource {
      */
     @PostMapping("/tickets/next")
     @Timed
-    public ResponseEntity<Ticket> getNextTicketSetPreviousTicketStatus(@RequestBody TicketDTO ticketDTO) {
+    public ResponseEntity<String> setPreviousTicketStatus(@RequestBody TicketDTO ticketDTO) {
         log.debug("REST request to getNextTicketSetPreviousTicketStatus Ticket : {}", ticketDTO);
         Long preTickId = ticketDTO.getPreviousTicketId();
-        if(preTickId != null && preTickId > 0){
+        if (preTickId != null && preTickId > 0) {
             Ticket previousTicket = ticketService.findOne(preTickId);
             previousTicket.setStatus(ticketDTO.getPreviousTicketStatus());
             ticketService.save(previousTicket);
         }
-        List<TicketStatus> candidateStatues = new ArrayList<>();
-        candidateStatues.add(TicketStatus.NO_ORDER_WAIT);
-        candidateStatues.add(TicketStatus.READY);
-        Ticket ticket = ticketService.getNextTicket(ticketDTO.getFoodJointId(),candidateStatues);
-        return Optional.ofNullable(ticket)
-            .map(result ->{
-                result.setStatus(TicketStatus.PROCESS);
-                ticketService.save(result);
-                return new ResponseEntity<>(
-                    result,
-                    HttpStatus.OK);
-            })
-            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok("OK");
     }
 
     /**
-     * GET  /tickets/next_has_order : get the next ticket.
+     * POST  /tickets/next_has_order : get the next ticket.
      *
      * @param ticketDTO foodJointId, previousTicketId, previousTicketStatus(READY or SKIP)
      * @return the ResponseEntity with status 200 (OK) and with body the ticket, or with status 404 (Not Found)

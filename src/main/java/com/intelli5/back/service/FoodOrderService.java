@@ -9,6 +9,7 @@ import com.intelli5.back.repository.MenuItemRepository;
 import com.intelli5.back.repository.search.FoodOrderSearchRepository;
 import com.intelli5.back.service.dto.ItemDTO;
 import com.intelli5.back.service.dto.OrderDTO;
+import com.intelli5.back.service.dto.TicketGo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -70,7 +71,7 @@ public class FoodOrderService {
      * @param orderDTO the entity to save
      * @return the persisted entity
      */
-    public FoodOrder createOrder(OrderDTO orderDTO) {
+    public TicketGo createOrder(OrderDTO orderDTO) {
         log.debug("Request to create FoodOrder : {}", orderDTO);
         if (!paymentService.confirmPayment(orderDTO.getPaymentInfo())) {
             return null;
@@ -107,7 +108,7 @@ public class FoodOrderService {
 
         FoodOrder result = foodOrderRepository.save(foodOrder);
         foodOrderSearchRepository.save(result);
-        return result;
+        return ticketService.getGoTicket(result.getTicket());
     }
 
     /**

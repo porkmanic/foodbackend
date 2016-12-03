@@ -10,6 +10,7 @@ import com.intelli5.back.service.FoodJointService;
 import com.intelli5.back.service.OrderItemService;
 import com.intelli5.back.service.TicketService;
 import com.intelli5.back.service.dto.TicketDTO;
+import com.intelli5.back.service.dto.TicketGo;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,14 +132,14 @@ public class TicketResource {
      */
     @GetMapping("/tickets/username/{name}")
     @Timed
-    public List<Ticket> findByUser_Name(@PathVariable String name) {
+    public List<TicketGo> findByUser_Name(@PathVariable String name) {
         log.debug("REST request to get findByUser_Id");
-        List<Ticket> tickets = ticketService.findByUser_Login(name);
-        for (Ticket ticket : tickets) {
-            if (ticket.getStatus() == TicketStatus.FINISH) {
-                tickets.remove(ticket);
-            }
-        }
+        List<TicketGo> tickets = ticketService.findByUser_Login(name);
+//        for (TicketGo ticket : tickets) {
+//            if (ticket.getStatus() == TicketStatus.FINISH) {
+//                tickets.remove(ticket);
+//            }
+//        }
         return tickets;
     }
 

@@ -2,13 +2,12 @@ package com.intelli5.back.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.intelli5.back.domain.FoodOrder;
-import com.intelli5.back.domain.Ticket;
 import com.intelli5.back.service.FoodOrderService;
 import com.intelli5.back.service.dto.OrderDTO;
+import com.intelli5.back.service.dto.TicketGo;
 import com.intelli5.back.web.rest.util.HeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
 
 /**
  * REST controller for managing FoodOrder.
@@ -64,15 +59,15 @@ public class FoodOrderResource {
      */
     @PostMapping("/food-orders/new")
     @Timed
-    public ResponseEntity<Ticket> createOrder(@RequestBody OrderDTO orderDTO) throws URISyntaxException {
+    public ResponseEntity<TicketGo> createOrder(@RequestBody OrderDTO orderDTO) throws URISyntaxException {
         log.debug("REST request to createOrder OrderDTO : {}", orderDTO);
         if (orderDTO.getPaymentInfo().isEmpty() || orderDTO.getFoodJointId() <= 0 || orderDTO.getItems().isEmpty()) {
             return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("foodOrder", "wrong param", "wrong param")).body(null);
         }
-        FoodOrder result = foodOrderService.createOrder(orderDTO);
-        return ResponseEntity.created(new URI("/api/food-orders/" + result.getId()))
+        TicketGo result = foodOrderService.createOrder(orderDTO);
+        return ResponseEntity.created(new URI("/api/tickets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert("foodOrder", result.getId().toString()))
-            .body(result.getTicket());
+            .body(result);
     }
 
     /**

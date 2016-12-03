@@ -7,6 +7,7 @@ import com.intelli5.back.domain.enumeration.TicketStatus;
 import com.intelli5.back.repository.TicketRepository;
 import com.intelli5.back.repository.UserRepository;
 import com.intelli5.back.repository.search.TicketSearchRepository;
+import com.intelli5.back.service.dto.TicketGo;
 import net.glxn.qrgen.javase.QRCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,10 +119,33 @@ public class TicketService {
      * @return the entity
      */
     @Transactional(readOnly = true)
-    public List<Ticket> findByUser_Login(String name) {
+    public List<TicketGo> findByUser_Login(String name) {
         log.debug("Request to findByUser_Login : {}", name);
         List<Ticket> tickets = ticketRepository.findByUser_Login(name);
-        return tickets;
+        List<TicketGo> results = new ArrayList<>();
+        if (tickets != null) {
+            for (Ticket ticket : tickets) {
+                results.add(getGoTicket(ticket));
+            }
+        }
+        return results;
+    }
+
+    public TicketGo getGoTicket(Ticket ticket) {
+        TicketGo ticketGo = new TicketGo(ticket);
+        if (ticket.getStatus() == TicketStatus.FINISH || ticket.getStatus() == TicketStatus.CANCEL || ticket.getStatus() == TicketStatus.SKIP) {
+            ticketGo.setEstimateTime(0);
+        } else {
+            Float perPerson = ticket.getFoodJoint().getEstimatWaitPerPerson();
+            List<TicketStatus> ticketStatuses = new ArrayList<>();
+            ticketStatuses.add(TicketStatus.NO_ORDER_WAIT);
+            ticketStatuses.add(TicketStatus.WAIT);
+            ticketStatuses.add(TicketStatus.READY);
+            ticketStatuses.add(TicketStatus.PROCESS);
+            Long personInline = ticketRepository.countByFoodJoint_IdAndStatusInAndIdLessThan(ticket.getFoodJoint().getId(), ticketStatuses, ticket.getId());
+            ticketGo.setEstimateTime((int) (personInline * perPerson));
+        }
+        return ticketGo;
     }
 
     /**

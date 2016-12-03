@@ -24,4 +24,6 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
 
     List<Ticket> findByFoodJoint_IdAndStatusIn(Long id, Collection<TicketStatus> status);
     Ticket findTopByFoodJoint_IdAndStatusIn(Long foodJointId, Collection<TicketStatus> statuses);
+
+    Long countByFoodJoint_IdAndStatusInAndIdLessThan(Long id, Collection<TicketStatus> status, Long myId);
 }

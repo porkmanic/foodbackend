@@ -95,6 +95,8 @@ public class TicketService {
         List<TicketStatus> candidateStatues = new ArrayList<>();
         candidateStatues.add(TicketStatus.NO_ORDER_WAIT);
         candidateStatues.add(TicketStatus.READY);
+        candidateStatues.add(TicketStatus.PROCESS);
+        candidateStatues.add(TicketStatus.WAIT);
         List<Ticket> tickets = ticketRepository.findByFoodJoint_IdAndStatusIn(id, candidateStatues);
         return tickets;
     }
